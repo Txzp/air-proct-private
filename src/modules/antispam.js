@@ -1,4 +1,4 @@
-const { Events } = require('discord.js');
+const { Events, ChannelType, PermissionFlagsBits: P } = require('discord.js');
 const cfg = require('../config');
 const store = require('../store');
 const { isTrusted } = require('../trust');
@@ -80,6 +80,47 @@ async function handleWebhook(message) {
   ]);
 }
 
+/* ---------- Honeypot ---------- */
+let honeypotId = cfg.honeypot.channelId;
+
+async function ensureHoneypot(guild) {
+  let ch = honeypotId && (await guild.channels.fetch(honeypotId).catch(() => null));
+  if (!ch) ch = guild.channels.cache.find((c) => c.type === ChannelType.GuildText && c.name === cfg.honeypot.channelName);
+  if (!ch) {
+    ch = await guild.channels
+      .create({
+        name: cfg.honeypot.channelName,
+        type: ChannelType.GuildText,
+        position: 0,
+        topic: '⚠️ NO escribas aquí. Canal trampa de AirProtect: cualquier mensaje = silencio de 5 minutos.',
+        permissionOverwrites: [{ id: guild.id, allow: [P.ViewChannel, P.SendMessages] }],
+        reason: 'AirProtect: canal honeypot',
+      })
+      .catch((e) => (console.error('[honeypot] No pude crear el canal:', e.message), null));
+    if (ch) {
+      await ch
+        .send('🚫 **No escribas en este canal.**\nEs una trampa para bots y cuentas de spam: cualquier mensaje aquí = **silencio de 5 minutos**.')
+        .catch(() => {});
+      log('info', 'Honeypot creado', `Canal trampa: ${ch}`);
+    }
+  }
+  if (ch) honeypotId = ch.id;
+}
+
+async function honeypotHit(message) {
+  const member = message.member;
+  await message.delete().catch(() => {});
+  const ok = await member
+    ?.timeout(cfg.honeypot.timeoutMs, 'AirProtect: escribió en el canal honeypot')
+    .then(() => true)
+    .catch(() => false);
+  log('danger', 'Honeypot activado', `${member ?? message.author} (\`${message.author.tag}\`) escribió en el canal trampa${ok ? ' y fue silenciado **5 minutos**.' : ', pero no pude silenciarlo.'}`, [
+    { name: 'Mensaje', value: (message.content || '[sin texto]').slice(0, 500) },
+    { name: 'ID', value: message.author.id, inline: true },
+  ]);
+  member?.send(`🚫 **AirProtect:** escribiste en el canal trampa de **${message.guild.name}**. Silenciado 5 minutos.`).catch(() => {});
+}
+
 async function onMessage(message) {
   if (!message.guild || message.guild.id !== cfg.guildId) return;
   if (message.webhookId) return handleWebhook(message);
@@ -87,6 +128,7 @@ async function onMessage(message) {
   if (isTrusted(message.guild, message.author.id)) return;
   const member = message.member;
   if (!member) return;
+  if (message.channelId === honeypotId) return honeypotHit(message);
 
   const now = Date.now();
 
@@ -124,4 +166,4 @@ function init(client) {
   }, 60_000).unref();
 }
 
-module.exports = { init };
+module.exports = { init, ensureHoneypot };

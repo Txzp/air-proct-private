@@ -6,6 +6,8 @@ const antispam = require('./modules/antispam');
 const antinuke = require('./modules/antinuke');
 const antiraid = require('./modules/antiraid');
 const commands = require('./modules/commands');
+const tickets = require('./modules/tickets');
+const welcome = require('./modules/welcome');
 
 if (!cfg.token) {
   console.error('Falta DISCORD_TOKEN en las variables de entorno.');
@@ -39,6 +41,8 @@ logger.init(client);
 antispam.init(client);
 antiraid.init(client);
 commands.init(client);
+tickets.init(client);
+welcome.init(client);
 
 client.once(Events.ClientReady, async (c) => {
   console.log(`[bot] Conectado como ${c.user.tag}`);
@@ -60,6 +64,8 @@ async function initGuild(c) {
   await guild.channels.fetch().catch(() => {});
   await antinuke.init(c, guild);
   await commands.register(guild).catch((e) => console.error('[bot] Error registrando comandos:', e.message));
+  await tickets.ensurePanel(guild).catch((e) => console.error('[tickets]', e.message));
+  await antispam.ensureHoneypot(guild).catch((e) => console.error('[honeypot]', e.message));
 
   ready = true;
   const me = guild.members.me;

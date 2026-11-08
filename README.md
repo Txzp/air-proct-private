@@ -5,12 +5,15 @@ Bot anti-raid / anti-nuke / anti-spam hecho a medida para un solo server (`15666
 ## Qué hace
 
 **Anti-spam**
-- 10 mensajes en 10 s → silencio de **60 s** (oportunidad 1/3), otra vez 60 s (2/3), otra vez 60 s (3/3).
+- 15 mensajes en 10 s → silencio de **60 s** (oportunidad 1/3), otra vez 60 s (2/3), otra vez 60 s (3/3).
 - A la 4ª vez → **5 minutos**. Las oportunidades se reinician tras 1 hora sin spam.
 - Borra los mensajes del spam, avisa por DM y lo registra en el canal de logs.
 - Menciones masivas (5+ en un mensaje) cuentan como spam.
 - Borra invitaciones de otros servers (`ANTI_INVITE=false` para apagarlo).
 - Webhooks que spamean (8 mensajes en 5 s) se eliminan.
+
+**Honeypot (canal trampa)**
+- El bot crea `🚫・no-escribir` (o usa `HONEYPOT_CHANNEL_ID`). Quien escriba ahí → mensaje borrado + **silencio de 5 min** + log. Atrapa bots de spam y selfbots.
 
 **Anti-nuke** (lee el registro de auditoría en tiempo real)
 - **Bot añadido por alguien sin whitelist → expulsado al instante** y el que lo añadió es castigado.
@@ -23,6 +26,15 @@ Bot anti-raid / anti-nuke / anti-spam hecho a medida para un solo server (`15666
 **Anti-raid**
 - 8 entradas en 10 s → **modo raid** 10 min: se expulsan cuentas con menos de 7 días.
 - `MIN_ACCOUNT_AGE_DAYS` para exigir edad mínima siempre.
+
+**Tickets**
+- Panel con botón 🎫 en el canal de tickets (se envía solo al arrancar si no existe).
+- Crea `username-01`, `username-02`... en la categoría de tickets (número más bajo libre). 1 ticket abierto por persona.
+- Mensaje automático mencionando al usuario + @Manager, @own y @Soporte, con botones **Atender** y **Close**.
+- Solo el staff puede cerrar: sale un formulario (solo tú lo ves) para el motivo; luego "se elimina en 5 segundos" y llega al canal de logs: Ticket, Creator, Closed By, Reason + transcript `.txt`.
+
+**Bienvenida**
+- `@usuario **Bienvenid@ a 0km** :hola:` + imagen con su banner de fondo, su foto al centro y su DisplayName en blanco.
 
 **Comandos** (solo dueño + whitelist): `/whitelist add|remove|list`, `/lockdown`, `/unlock`, `/raidmode on|off`, `/strikes`, `/resetstrikes`, `/status`.
 

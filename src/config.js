@@ -32,7 +32,7 @@ module.exports = {
   whitelist: list(process.env.WHITELIST_IDS),
 
   antiSpam: {
-    messages: num(process.env.SPAM_MESSAGES, 10), // 10 mensajes...
+    messages: num(process.env.SPAM_MESSAGES, 15), // 15 mensajes...
     windowMs: num(process.env.SPAM_WINDOW_MS, 10_000), // ...dentro de 10 segundos
     freeStrikes: 3, // 3 oportunidades
     strikeTimeoutMs: 60_000, // silencio de 60 s en cada oportunidad
@@ -61,6 +61,31 @@ module.exports = {
     },
     // Qué hacer con un HUMANO que se pasa del límite: "strip" (quitar roles + aislar 28 días) o "ban"
     humanPunishment: (process.env.NUKE_HUMAN_PUNISHMENT || 'strip').toLowerCase(),
+  },
+
+  // Canal trampa: quien escriba ahí (cuentas spam / selfbots) se silencia 5 min
+  honeypot: {
+    channelId: process.env.HONEYPOT_CHANNEL_ID || '', // vacío = el bot lo crea solo
+    channelName: process.env.HONEYPOT_CHANNEL_NAME || '🚫・no-escribir',
+    timeoutMs: 5 * 60_000,
+  },
+
+  tickets: {
+    panelChannelId: process.env.TICKET_PANEL_CHANNEL_ID || '1566962055125270679',
+    categoryId: process.env.TICKET_CATEGORY_ID || '1566962002297880667',
+    logChannelId: process.env.TICKET_LOG_CHANNEL_ID || '', // vacío = canal de logs de AirProtect
+    closeDelayMs: 5_000,
+    // Roles que atienden y pueden cerrar tickets
+    staffRoles: list(process.env.TICKET_STAFF_ROLE_IDS).length
+      ? list(process.env.TICKET_STAFF_ROLE_IDS)
+      : ['1568104847390285975', '1566683311164624996'], // Manager, own
+    staffRoleNames: ['Soporte'], // también se buscan por nombre (Soporte)
+  },
+
+  welcome: {
+    channelId: process.env.WELCOME_CHANNEL_ID || '1566954709372239923',
+    serverName: process.env.WELCOME_SERVER_NAME || '0km',
+    emojiName: process.env.WELCOME_EMOJI || 'hola',
   },
 
   antiRaid: {
