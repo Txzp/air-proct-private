@@ -9,12 +9,22 @@ module.exports = {
   guildId: process.env.GUILD_ID || '1566683072953323611',
   logChannelId: process.env.LOG_CHANNEL_ID || '1568900069648892025',
   port: num(process.env.PORT, 3000),
+  leaveOtherGuilds: bool(process.env.LEAVE_OTHER_GUILDS, false), // true = se sale de servers que no sean GUILD_ID
 
   // Roles importantes del server (se respaldan sus miembros y se recrean si los borran)
   protectedRoles: {
     boy: process.env.ROLE_BOY || '1567686054579011745',
     girl: process.env.ROLE_GIRL || '1567686174024274070',
   },
+
+  // Roles de confianza: quien tenga uno de estos roles es ignorado por el anti-nuke/anti-spam
+  trustedRoles: list(process.env.TRUSTED_ROLE_IDS).length
+    ? list(process.env.TRUSTED_ROLE_IDS)
+    : [
+        '1566683311164624996', // own (admins)
+        '1568104847390285975', // Manager
+        '1568486463975333959', // Bots (bots ya aprobados)
+      ],
 
   // Dueños del bot (pueden manejar la whitelist). El dueño del server siempre cuenta.
   ownerIds: list(process.env.OWNER_IDS),

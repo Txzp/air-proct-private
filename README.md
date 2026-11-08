@@ -34,7 +34,8 @@ Bot anti-raid / anti-nuke / anti-spam hecho a medida para un solo server (`15666
 2. Invítalo con permiso de **Administrador**:
    `https://discord.com/oauth2/authorize?client_id=TU_CLIENT_ID&permissions=8&scope=bot%20applications.commands`
 3. **Muy importante:** en Ajustes del server → Roles, arrastra el rol de AirProtect **arriba del todo**. Un bot solo puede frenar a quien esté por debajo de él.
-4. Haz `/whitelist add` a los bots y staff de confianza (MEE6, tus mods, etc.). Todo lo que no esté en whitelist es tratado como sospechoso.
+4. Roles de confianza ya configurados: **own**, **Manager** y **Bots** (nadie con esos roles es castigado). Si alguien sin confianza intenta dar uno de esos roles, se le quita al instante.
+5. Haz `/whitelist add` a los bots y staff de confianza (MEE6, tus mods, etc.). Todo lo que no esté en whitelist es tratado como sospechoso.
 
 ## Deploy en Render
 

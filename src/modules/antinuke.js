@@ -249,7 +249,9 @@ async function onAudit(entry, guild) {
       const add = entry.changes.find((c) => c.key === '$add')?.new || [];
       const rem = entry.changes.find((c) => c.key === '$remove')?.new || [];
       const target = guild.members.cache.get(entry.targetId);
-      const bad = add.filter((r) => (guild.roles.cache.get(r.id)?.permissions.bitfield ?? 0n) & DANGEROUS);
+      const bad = add.filter(
+        (r) => cfg.trustedRoles.includes(r.id) || (guild.roles.cache.get(r.id)?.permissions.bitfield ?? 0n) & DANGEROUS
+      );
       if (bad.length) {
         type = 'dangerousPerm';
         instant = true;

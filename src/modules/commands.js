@@ -123,7 +123,7 @@ async function onInteraction(i) {
     case 'status': {
       const me = guild.members.me;
       const top = me.roles.highest;
-      const higher = guild.roles.cache.filter((r) => r.position > top.position).size;
+      const higher = guild.roles.cache.filter((r) => r.position > top.position && !cfg.trustedRoles.includes(r.id) && !r.managed).size;
       const e = new EmbedBuilder()
         .setColor(0x5865f2)
         .setTitle('🛡️ AirProtect — estado')
