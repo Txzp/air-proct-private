@@ -47,6 +47,9 @@ Bot anti-raid / anti-nuke / anti-spam hecho a medida para un solo server (`15666
 - `!mg como andas we` → el bot responde (reply) con personalidad de compa. Usa modelos gratis de OpenRouter (los detecta solo y cambia de modelo si uno falla). Recuerda la plática reciente del canal. Cooldown de 5 s por usuario.
 - Variables: `OPENROUTER_API_KEY` (obligatoria), `MG_CHANNEL_ID` (opcional), `MG_MODEL` (opcional).
 
+**Contador en vivo**
+- En el canal de stats el bot mantiene un mensaje (sin embed) con: @Boy 0km -> N, @Girl 0km -> N, Miembros Total y Online. Se edita cada 5 s si algo cambió.
+
 **Comandos** (solo dueño + whitelist): `/whitelist add|remove|list`, `/lockdown`, `/unlock`, `/raidmode on|off`, `/strikes`, `/resetstrikes`, `/status`.
 
 ## Configurar el bot en Discord

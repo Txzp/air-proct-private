@@ -105,6 +105,11 @@ module.exports = {
     memory: 6, // recuerda los últimos 6 intercambios del canal
   },
 
+  stats: {
+    channelId: process.env.STATS_CHANNEL_ID || '1566951065427902514',
+    intervalMs: num(process.env.STATS_INTERVAL_MS, 5_000),
+  },
+
   boost: {
     channelId: process.env.BOOST_CHANNEL_ID || '1566958667410968656',
     emojiName: process.env.BOOST_EMOJI || 'boost', // emoji del server cuyo nombre contenga esto; si no hay, 💎
