@@ -4,7 +4,6 @@ const store = require('../store');
 const { isOwner, isTrusted, protectedRoleIds } = require('../trust');
 const { log } = require('../logger');
 const antiraid = require('./antiraid');
-const boost = require('./boost');
 
 const defs = [
   new SlashCommandBuilder()
@@ -22,13 +21,6 @@ const defs = [
   new SlashCommandBuilder().setName('strikes').setDescription('Ver las oportunidades de spam de alguien').addUserOption((o) => o.setName('usuario').setDescription('Usuario').setRequired(true)),
   new SlashCommandBuilder().setName('resetstrikes').setDescription('Reinicia las oportunidades de spam').addUserOption((o) => o.setName('usuario').setDescription('Usuario').setRequired(true)),
   new SlashCommandBuilder().setName('status').setDescription('Estado de AirProtect'),
-  new SlashCommandBuilder()
-    .setName('boostcard')
-    .setDescription('Envía la tarjeta de boost de 1 a 4 usuarios al canal de boosts')
-    .addUserOption((o) => o.setName('usuario1').setDescription('Booster').setRequired(true))
-    .addUserOption((o) => o.setName('usuario2').setDescription('Booster'))
-    .addUserOption((o) => o.setName('usuario3').setDescription('Booster'))
-    .addUserOption((o) => o.setName('usuario4').setDescription('Booster')),
 ].map((c) => c.setDefaultMemberPermissions(PermissionFlagsBits.Administrator).toJSON());
 
 const LOCK_TYPES = [ChannelType.GuildText, ChannelType.GuildAnnouncement, ChannelType.GuildForum, ChannelType.GuildVoice];
@@ -127,23 +119,6 @@ async function onInteraction(i) {
       delete store.data.strikes[u.id];
       store.save();
       return reply(`♻️ Strikes de ${u} reiniciados.`);
-    }
-    case 'boostcard': {
-      await i.deferReply({ flags: MessageFlags.Ephemeral });
-      const users = ['usuario1', 'usuario2', 'usuario3', 'usuario4'].map((n) => i.options.getUser(n)).filter(Boolean);
-      const done = [];
-      for (const u of [...new Map(users.map((x) => [x.id, x])).values()]) {
-        const m = await guild.members.fetch(u.id).catch(() => null);
-        if (!m) {
-          done.push(`❌ ${u} no está en el server`);
-          continue;
-        }
-        await boost
-          .announce(m, true)
-          .then(() => done.push(`✅ ${u}`))
-          .catch((e) => done.push(`❌ ${u}: ${e.message}`));
-      }
-      return i.editReply(`Tarjetas de boost enviadas:\n${done.join('\n')}`);
     }
     case 'status': {
       const me = guild.members.me;

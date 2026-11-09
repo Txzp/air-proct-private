@@ -68,6 +68,7 @@ async function initGuild(c) {
   await commands.register(guild).catch((e) => console.error('[bot] Error registrando comandos:', e.message));
   await tickets.ensurePanel(guild).catch((e) => console.error('[tickets]', e.message));
   await antispam.ensureHoneypot(guild).catch((e) => console.error('[honeypot]', e.message));
+  await boost.resendOnce(guild).catch((e) => console.error('[boost]', e.message));
 
   ready = true;
   const me = guild.members.me;
