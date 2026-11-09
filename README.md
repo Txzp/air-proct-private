@@ -58,6 +58,9 @@ Bot anti-raid / anti-nuke / anti-spam hecho a medida para un solo server (`15666
 **`!vc time`**
 - `!vc time` (o `!vc time @user`) → embed con cuánto tiempo llevas en vc + el canal + una nota troll según el tiempo. Se borra a los 13 s.
 
+**`/mj mensaje`** (roles altos)
+- El bot dice el mensaje en el canal sin mostrar quién lo mandó. El comando es oculto (nadie ve que lo usaste). Sin @everyone/@here. Queda registrado en los logs de AirProtect.
+
 **Contador en vivo**
 - En el canal de stats el bot mantiene un mensaje (sin embed) con: @Boy 0km -> N, @Girl 0km -> N, Miembros Total y Online. Se edita cada 5 s si algo cambió.
 

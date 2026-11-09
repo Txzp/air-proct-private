@@ -80,7 +80,7 @@ async function initGuild(c) {
   await antispam.ensureHoneypot(guild).catch((e) => console.error('[honeypot]', e.message));
   await warns.rebuild(guild).catch((e) => console.error('[warns]', e.message));
   stats.start(c);
-  vctime.start(guild);
+  await vctime.start(guild).catch((e) => console.error('[vctime]', e.message));
   await serverlogs.start(guild).catch((e) => console.error('[serverlogs]', e.message));
 
   ready = true;

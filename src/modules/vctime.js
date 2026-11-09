@@ -94,11 +94,51 @@ function init(client) {
   client.on(Events.MessageCreate, (m) => onMessage(m).catch((e) => console.error('[vctime]', e)));
 }
 
-// Al arrancar: quien ya esté en vc empieza a contar desde ahora (se marca con "+")
-function start(guild) {
-  for (const [id, vs] of guild.voiceStates.cache) {
-    if (vs.channelId && !vs.member?.user.bot && !sessions.has(id)) startSession(id, vs.channelId, true);
+// Al arrancar: recupera desde cuándo está cada quien en vc leyendo los logs del server
+// ("🔊 Entró a voz"). Si no hay registro, cuenta desde ahora y se marca con "+".
+async function recoverFromLogs(guild, ids) {
+  const found = new Map();
+  const ch = await guild.channels.fetch(cfg.serverLogs.channelId).catch(() => null);
+  if (!ch?.isTextBased()) return found;
+  const pending = new Set(ids);
+  const done = new Set();
+  let before;
+  for (let n = 0; n < 30 && pending.size; n++) {
+    const batch = await ch.messages.fetch({ limit: 100, before }).catch(() => null);
+    if (!batch?.size) break;
+    for (const m of batch.values()) {
+      // los mensajes vienen del más nuevo al más viejo
+      if (m.author.id !== guild.client.user.id) continue;
+      for (const e of m.embeds) {
+        const id = e.footer?.text?.match(/^ID: (\d+)$/)?.[1];
+        if (!id || !pending.has(id) || done.has(id)) continue;
+        if (e.title?.includes('Entró a voz')) {
+          found.set(id, m.createdTimestamp);
+          done.add(id);
+          pending.delete(id);
+        } else if (e.title?.includes('Salió de voz')) {
+          // salió después de su última entrada registrada → no se sabe cuándo volvió
+          done.add(id);
+          pending.delete(id);
+        }
+      }
+    }
+    before = batch.last().id;
+    if (batch.size < 100) break;
   }
+  return found;
+}
+
+async function start(guild) {
+  const inVc = [...guild.voiceStates.cache.values()].filter((vs) => vs.channelId && !vs.member?.user.bot);
+  const known = await recoverFromLogs(guild, inVc.map((vs) => vs.id)).catch(() => new Map());
+  for (const vs of inVc) {
+    if (sessions.has(vs.id)) continue;
+    const since = known.get(vs.id);
+    if (since) sessions.set(vs.id, { start: since, channelId: vs.channelId, approx: false });
+    else startSession(vs.id, vs.channelId, true);
+  }
+  console.log(`[vctime] ${inVc.length} en vc, ${known.size} recuperados desde los logs`);
 }
 
 module.exports = { init, start };
