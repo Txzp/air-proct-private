@@ -88,6 +88,11 @@ module.exports = {
     emojiName: process.env.WELCOME_EMOJI || 'hola',
   },
 
+  boost: {
+    channelId: process.env.BOOST_CHANNEL_ID || '1566958667410968656',
+    emojiName: process.env.BOOST_EMOJI || 'boost', // emoji del server cuyo nombre contenga esto; si no hay, 💎
+  },
+
   antiRaid: {
     joins: num(process.env.RAID_JOINS, 8), // 8 entradas...
     windowMs: num(process.env.RAID_WINDOW_MS, 10_000), // ...en 10 s = raid

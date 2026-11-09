@@ -36,6 +36,9 @@ Bot anti-raid / anti-nuke / anti-spam hecho a medida para un solo server (`15666
 **Bienvenida**
 - `@usuario **Bienvenid@ a 0km** :hola:` + imagen con su banner de fondo, su foto al centro y su DisplayName en blanco.
 
+**Boosts**
+- Cuando alguien boostea: `@usuario acaba de boostear el server 💎` + tarjeta Nitro (aro brillante rosa/morado, destellos, banner, nombre y "N boosts • Nivel X") en el canal de boosts.
+
 **Comandos** (solo dueño + whitelist): `/whitelist add|remove|list`, `/lockdown`, `/unlock`, `/raidmode on|off`, `/strikes`, `/resetstrikes`, `/status`.
 
 ## Configurar el bot en Discord

@@ -8,6 +8,7 @@ const antiraid = require('./modules/antiraid');
 const commands = require('./modules/commands');
 const tickets = require('./modules/tickets');
 const welcome = require('./modules/welcome');
+const boost = require('./modules/boost');
 
 if (!cfg.token) {
   console.error('Falta DISCORD_TOKEN en las variables de entorno.');
@@ -43,6 +44,7 @@ antiraid.init(client);
 commands.init(client);
 tickets.init(client);
 welcome.init(client);
+boost.init(client);
 
 client.once(Events.ClientReady, async (c) => {
   console.log(`[bot] Conectado como ${c.user.tag}`);

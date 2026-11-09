@@ -29,7 +29,7 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
-async function renderCard(member) {
+async function renderCard(member, opts = {}) {
   const user = await member.user.fetch(true).catch(() => member.user); // trae banner y color
   const canvas = createCanvas(W, H);
   const ctx = canvas.getContext('2d');
@@ -63,17 +63,62 @@ async function renderCard(member) {
   ctx.fillStyle = shade;
   ctx.fillRect(0, 0, W, H);
 
+  // Tinte de color opcional (ej. rosa Nitro para boosts)
+  if (opts.tint) {
+    const t = ctx.createLinearGradient(0, 0, W, H);
+    opts.tint.forEach((c, i) => t.addColorStop(i / (opts.tint.length - 1), c));
+    ctx.fillStyle = t;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  // Partículas / brillos opcionales
+  if (opts.sparkles) {
+    for (let i = 0; i < 40; i++) {
+      const x = Math.random() * W;
+      const y = Math.random() * H;
+      const r = Math.random() * 2.6 + 0.6;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${(Math.random() * 0.6 + 0.25).toFixed(2)})`;
+      ctx.fill();
+    }
+  }
+
+  // Texto superior opcional
+  if (opts.badge) {
+    ctx.save();
+    ctx.font = `22px ${FONT_STACK}`;
+    const bw = ctx.measureText(opts.badge).width + 44;
+    roundRect(ctx, W / 2 - bw / 2, 16, bw, 38, 19);
+    ctx.fillStyle = 'rgba(0,0,0,0.45)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(opts.badge, W / 2, 36);
+    ctx.restore();
+  }
+
   // Foto de perfil al centro
   const R = 95;
   const cx = W / 2;
-  const cy = 165;
+  const cy = opts.badge ? 172 : 165;
   const avatar = await loadImage(member.displayAvatarURL({ size: 512, extension: 'png', forceStatic: true })).catch(() => null);
   ctx.save();
   ctx.shadowColor = 'rgba(0,0,0,0.6)';
   ctx.shadowBlur = 25;
   ctx.beginPath();
-  ctx.arc(cx, cy, R + 7, 0, Math.PI * 2);
-  ctx.fillStyle = '#ffffff';
+  ctx.arc(cx, cy, R + (opts.ring ? 9 : 7), 0, Math.PI * 2);
+  if (opts.ring) {
+    const rg = ctx.createLinearGradient(cx - R, cy - R, cx + R, cy + R);
+    opts.ring.forEach((c, i) => rg.addColorStop(i / (opts.ring.length - 1), c));
+    ctx.shadowColor = opts.ring[0];
+    ctx.shadowBlur = 40;
+    ctx.fillStyle = rg;
+  } else ctx.fillStyle = '#ffffff';
   ctx.fill();
   ctx.restore();
   ctx.save();
@@ -100,12 +145,12 @@ async function renderCard(member) {
   ctx.shadowColor = 'rgba(0,0,0,0.75)';
   ctx.shadowBlur = 12;
   ctx.fillStyle = '#ffffff';
-  ctx.fillText(name, cx, 325);
+  ctx.fillText(name, cx, opts.badge ? 330 : 325);
 
   ctx.shadowBlur = 8;
   ctx.font = `24px ${FONT_STACK}`;
   ctx.fillStyle = 'rgba(255,255,255,0.8)';
-  ctx.fillText(`Miembro #${member.guild.memberCount}`, cx, 375);
+  ctx.fillText(opts.subtitle ?? `Miembro #${member.guild.memberCount}`, cx, opts.badge ? 380 : 375);
 
   return canvas.encode('png');
 }
