@@ -105,6 +105,12 @@ module.exports = {
     memory: 6, // recuerda los últimos 6 intercambios del canal
   },
 
+  // Logs del servidor (canal privado del staff): entradas/salidas, roles, canales, mensajes, voz...
+  serverLogs: {
+    channelId: process.env.SERVER_LOG_CHANNEL_ID || '1566946140622946397',
+    ignoreChannels: list(process.env.SERVER_LOG_IGNORE_CHANNELS), // canales donde no registrar mensajes
+  },
+
   stats: {
     channelId: process.env.STATS_CHANNEL_ID || '1566951065427902514',
     intervalMs: num(process.env.STATS_INTERVAL_MS, 5_000),
