@@ -93,6 +93,16 @@ module.exports = {
     punishments: { 3: 60 * 60_000, 5: 24 * 60 * 60_000 }, // 3 warns = 1 h aislado, 5 warns = 1 día
   },
 
+  // Charla con IA: !mg <mensaje> (OpenRouter, modelos gratis)
+  mg: {
+    apiKey: process.env.OPENROUTER_API_KEY || '',
+    model: process.env.MG_MODEL || '', // vacío = elige solo entre los modelos :free
+    channelId: process.env.MG_CHANNEL_ID || '', // vacío = funciona en cualquier canal
+    prefix: '!mg',
+    cooldownMs: num(process.env.MG_COOLDOWN_MS, 5_000),
+    memory: 6, // recuerda los últimos 6 intercambios del canal
+  },
+
   boost: {
     channelId: process.env.BOOST_CHANNEL_ID || '1566958667410968656',
     emojiName: process.env.BOOST_EMOJI || 'boost', // emoji del server cuyo nombre contenga esto; si no hay, 💎

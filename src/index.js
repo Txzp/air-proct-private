@@ -10,6 +10,7 @@ const tickets = require('./modules/tickets');
 const welcome = require('./modules/welcome');
 const boost = require('./modules/boost');
 const warns = require('./modules/warns');
+const mg = require('./modules/mg');
 
 if (!cfg.token) {
   console.error('Falta DISCORD_TOKEN en las variables de entorno.');
@@ -46,6 +47,7 @@ commands.init(client);
 tickets.init(client);
 welcome.init(client);
 boost.init(client);
+mg.init(client);
 
 client.once(Events.ClientReady, async (c) => {
   console.log(`[bot] Conectado como ${c.user.tag}`);
