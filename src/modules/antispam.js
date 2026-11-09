@@ -80,6 +80,56 @@ async function handleWebhook(message) {
   ]);
 }
 
+/* ---------- Raid spam ---------- */
+const inviteWarns = new Map();
+const DAY = 24 * 60 * 60_000;
+
+function preview(content) {
+  const lines = content.split('\n').map((l) => l.trim()).filter(Boolean);
+  const uniq = [...new Set(lines)];
+  const shown = uniq.slice(0, 3).join('\n').slice(0, 400);
+  return lines.length > 3 ? `${shown}\n… (${lines.length} líneas)` : shown || '[sin texto]';
+}
+
+function isRaidSpam(content) {
+  if (content.length < 200) return false;
+  const lines = content.split('\n').map((l) => l.trim()).filter(Boolean);
+  const counts = new Map();
+  for (const l of lines) counts.set(l, (counts.get(l) || 0) + 1);
+  const maxRepeat = Math.max(0, ...counts.values());
+  const headings = lines.filter((l) => /^#{1,3}\s/.test(l)).length;
+  return maxRepeat >= 6 || headings >= 6 || (content.length >= 1500 && counts.size <= 3);
+}
+
+async function raidSpamHit(message, hasInvite) {
+  const member = message.member;
+  const ageDays = (Date.now() - message.author.createdTimestamp) / DAY;
+  const items = (tracker.get(member.id) || []).concat({ id: message.id, channelId: message.channelId });
+  tracker.delete(member.id);
+  await deleteMessages(message.guild, items);
+  await message.delete().catch(() => {});
+
+  // Cuenta nueva = cuenta de raid → fuera. Cuenta normal → silencio 5 min.
+  let action;
+  if (ageDays < 7 && member.kickable) {
+    await member.send(`🛡️ **AirProtect:** fuiste expulsado de **${message.guild.name}** por mensaje de raid.`).catch(() => {});
+    action = (await member.kick('AirProtect: mensaje de raid (cuenta nueva)').then(() => true).catch(() => false))
+      ? '👢 Expulsado (cuenta nueva)'
+      : '❗ No se pudo expulsar';
+  } else {
+    action = (await member.timeout(S.finalTimeoutMs, 'AirProtect: mensaje de raid').then(() => true).catch(() => false))
+      ? '🔇 Silenciado 5 minutos'
+      : '❗ No se pudo silenciar';
+  }
+
+  log('danger', 'Intento de raid bloqueado', `${member} (\`${message.author.tag}\`) mandó un muro de spam${hasInvite ? ' con invitación' : ''} en <#${message.channelId}>.`, [
+    { name: 'Acción', value: action, inline: true },
+    { name: 'Edad de la cuenta', value: `${ageDays.toFixed(1)} días`, inline: true },
+    { name: 'ID', value: member.id, inline: true },
+    { name: 'Vista previa', value: preview(message.content || '') },
+  ]);
+}
+
 /* ---------- Honeypot ---------- */
 let honeypotId = cfg.honeypot.channelId;
 
@@ -138,12 +188,29 @@ async function onMessage(message) {
     return strike(member, `Menciones masivas (${mentions})`, [{ id: message.id, channelId: message.channelId }]);
   }
 
-  // Invitaciones a otros servers
-  if (S.antiInvite && INVITE_RE.test(message.content || '')) {
+  const content = message.content || '';
+  const hasInvite = S.antiInvite && INVITE_RE.test(content);
+
+  // Mensajes de raid: muro de texto repetido / títulos gigantes (con o sin invite)
+  if (isRaidSpam(content)) return raidSpamHit(message, hasInvite);
+
+  // Invitaciones a otros servers: 1ª vez aviso, si repite en 30 min cuenta como oportunidad
+  if (hasInvite) {
     await message.delete().catch(() => {});
-    log('warn', 'Invitación borrada', `${member} intentó mandar una invitación en <#${message.channelId}>.`, [
-      { name: 'Mensaje', value: (message.content || '').slice(0, 500) },
+    const now = Date.now();
+    const prev = inviteWarns.get(member.id) || 0;
+    inviteWarns.set(member.id, now);
+    if (now - prev < 30 * 60_000) {
+      return strike(member, 'Invitaciones repetidas', []);
+    }
+    log('warn', 'Invitación borrada', `${member} intentó mandar una invitación en <#${message.channelId}>. (Si repite → silencio)`, [
+      { name: 'Mensaje', value: preview(content) },
     ]);
+    message.channel
+      .send({ content: `${member} no se permiten invitaciones de otros servers 🛡️`, allowedMentions: { users: [member.id] } })
+      .then((m) => setTimeout(() => m.delete().catch(() => {}), 8000))
+      .catch(() => {});
+    return;
   }
 
   // 10 mensajes seguidos dentro de la ventana
