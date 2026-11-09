@@ -98,6 +98,8 @@ module.exports = {
     apiKey: process.env.OPENROUTER_API_KEY || '',
     model: process.env.MG_MODEL || '', // vacío = elige solo entre los modelos :free
     channelId: process.env.MG_CHANNEL_ID || '', // vacío = funciona en cualquier canal
+    groqKey: process.env.GROQ_API_KEY || '', // opcional, respaldo gratis (console.groq.com)
+    groqModel: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
     prefix: '!mg',
     cooldownMs: num(process.env.MG_COOLDOWN_MS, 5_000),
     memory: 6, // recuerda los últimos 6 intercambios del canal
