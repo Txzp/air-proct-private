@@ -40,34 +40,6 @@ async function announce(member, force = false) {
   });
 }
 
-// Reenvío único: manda la tarjeta nueva a estos boosters al arrancar.
-// Si el bot ya publicó la tarjeta de alguien en el canal, no la repite (seguro ante reinicios).
-const RESEND = ['afs', 'penefestini', 'upss wow', 'zk'];
-
-async function resendOnce(guild) {
-  const ch = await guild.channels.fetch(cfg.boost.channelId).catch(() => null);
-  if (!ch?.isTextBased()) return;
-  const msgs = await ch.messages.fetch({ limit: 100 }).catch(() => null);
-  const already = new Set(
-    (msgs ? [...msgs.values()] : [])
-      .filter((m) => m.author.id === guild.client.user.id && m.attachments.some((a) => a.name === 'boost.png'))
-      .flatMap((m) => [...m.mentions.users.keys()])
-  );
-  const norm = (x) => (x || '').toLowerCase().trim();
-  for (const name of RESEND) {
-    const m = guild.members.cache.find(
-      (x) => !x.user.bot && [x.displayName, x.user.username, x.user.globalName].some((n) => norm(n) === name)
-    );
-    if (!m) {
-      console.log(`[boost] Reenvío: no encontré a "${name}"`);
-      continue;
-    }
-    if (already.has(m.id)) continue;
-    await announce(m, true).catch((e) => console.error('[boost] reenvío', e.message));
-    await new Promise((r) => setTimeout(r, 1500));
-  }
-}
-
 function init(client) {
   // 1er boost de alguien
   client.on(Events.GuildMemberUpdate, (oldM, newM) => {
@@ -81,4 +53,4 @@ function init(client) {
   });
 }
 
-module.exports = { init, announce, resendOnce };
+module.exports = { init };
