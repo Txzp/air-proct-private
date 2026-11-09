@@ -5,9 +5,9 @@ const { renderCard } = require('./welcome');
 const recent = new Map(); // userId -> timestamp (evita doble mensaje)
 const BOOST_TYPES = [MessageType.GuildBoost, MessageType.GuildBoostTier1, MessageType.GuildBoostTier2, MessageType.GuildBoostTier3];
 
-async function announce(member) {
+async function announce(member, force = false) {
   const now = Date.now();
-  if (now - (recent.get(member.id) || 0) < 2 * 60_000) return;
+  if (!force && now - (recent.get(member.id) || 0) < 2 * 60_000) return;
   recent.set(member.id, now);
 
   const guild = await member.guild.fetch().catch(() => member.guild);
