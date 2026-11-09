@@ -111,6 +111,10 @@ module.exports = {
     ignoreChannels: list(process.env.SERVER_LOG_IGNORE_CHANNELS), // canales donde no registrar mensajes
   },
 
+  vcTime: {
+    deleteAfterMs: 13_000, // !vc time se borra a los 13 s
+  },
+
   stats: {
     channelId: process.env.STATS_CHANNEL_ID || '1566951065427902514',
     intervalMs: num(process.env.STATS_INTERVAL_MS, 5_000),

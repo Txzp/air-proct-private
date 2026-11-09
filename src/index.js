@@ -13,6 +13,7 @@ const warns = require('./modules/warns');
 const mg = require('./modules/mg');
 const stats = require('./modules/stats');
 const serverlogs = require('./modules/serverlogs');
+const vctime = require('./modules/vctime');
 
 if (!cfg.token) {
   console.error('Falta DISCORD_TOKEN en las variables de entorno.');
@@ -53,6 +54,7 @@ welcome.init(client);
 boost.init(client);
 mg.init(client);
 serverlogs.init(client);
+vctime.init(client);
 
 client.once(Events.ClientReady, async (c) => {
   console.log(`[bot] Conectado como ${c.user.tag}`);
@@ -78,6 +80,7 @@ async function initGuild(c) {
   await antispam.ensureHoneypot(guild).catch((e) => console.error('[honeypot]', e.message));
   await warns.rebuild(guild).catch((e) => console.error('[warns]', e.message));
   stats.start(c);
+  vctime.start(guild);
   await serverlogs.start(guild).catch((e) => console.error('[serverlogs]', e.message));
 
   ready = true;

@@ -55,6 +55,9 @@ Bot anti-raid / anti-nuke / anti-spam hecho a medida para un solo server (`15666
 - Voz: entró, salió, cambió de canal, transmitió, movidos/desconectados por mods.
 - Siempre dice **quién** hizo cada cosa.
 
+**`!vc time`**
+- `!vc time` (o `!vc time @user`) → embed con cuánto tiempo llevas en vc + el canal + una nota troll según el tiempo. Se borra a los 13 s.
+
 **Contador en vivo**
 - En el canal de stats el bot mantiene un mensaje (sin embed) con: @Boy 0km -> N, @Girl 0km -> N, Miembros Total y Online. Se edita cada 5 s si algo cambió.
 
