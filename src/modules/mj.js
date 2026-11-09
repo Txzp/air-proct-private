@@ -1,7 +1,6 @@
 const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { isTrusted } = require('../trust');
 const { isStaff } = require('./tickets');
-const { log } = require('../logger');
 
 const defs = [
   new SlashCommandBuilder()
@@ -21,7 +20,6 @@ async function handle(i) {
   // Sin @everyone/@here ni pings de roles masivos; menciones a usuarios sí
   await i.channel.send({ content: text, allowedMentions: { parse: ['users'] } });
   await i.deleteReply().catch(() => {}); // no queda ni rastro del comando para nadie
-  log('info', '/mj usado', `${i.user} hizo hablar al bot en <#${i.channelId}>.`, [{ name: 'Mensaje', value: text.slice(0, 1000) }]);
 }
 
 module.exports = { defs, names, handle };
