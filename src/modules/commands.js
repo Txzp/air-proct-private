@@ -4,6 +4,7 @@ const store = require('../store');
 const { isOwner, isTrusted, protectedRoleIds } = require('../trust');
 const { log } = require('../logger');
 const antiraid = require('./antiraid');
+const warns = require('./warns');
 
 const defs = [
   new SlashCommandBuilder()
@@ -21,7 +22,8 @@ const defs = [
   new SlashCommandBuilder().setName('strikes').setDescription('Ver las oportunidades de spam de alguien').addUserOption((o) => o.setName('usuario').setDescription('Usuario').setRequired(true)),
   new SlashCommandBuilder().setName('resetstrikes').setDescription('Reinicia las oportunidades de spam').addUserOption((o) => o.setName('usuario').setDescription('Usuario').setRequired(true)),
   new SlashCommandBuilder().setName('status').setDescription('Estado de AirProtect'),
-].map((c) => c.setDefaultMemberPermissions(PermissionFlagsBits.Administrator).toJSON());
+].map((c) => c.setDefaultMemberPermissions(PermissionFlagsBits.Administrator).toJSON())
+  .concat(warns.defs); // /warn, /warns, /clearwarns: visibles para el staff (se valida por rol)
 
 const LOCK_TYPES = [ChannelType.GuildText, ChannelType.GuildAnnouncement, ChannelType.GuildForum, ChannelType.GuildVoice];
 
@@ -69,6 +71,7 @@ async function onInteraction(i) {
   const guild = i.guild;
   const reply = (content, ephemeral = true) => i.reply({ content, flags: ephemeral ? MessageFlags.Ephemeral : undefined });
 
+  if (warns.names.includes(i.commandName)) return warns.handle(i);
   if (!isTrusted(guild, i.user.id)) return reply('🛡️ Solo el dueño y la whitelist pueden usar AirProtect.');
 
   switch (i.commandName) {

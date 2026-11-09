@@ -9,6 +9,7 @@ const commands = require('./modules/commands');
 const tickets = require('./modules/tickets');
 const welcome = require('./modules/welcome');
 const boost = require('./modules/boost');
+const warns = require('./modules/warns');
 
 if (!cfg.token) {
   console.error('Falta DISCORD_TOKEN en las variables de entorno.');
@@ -68,6 +69,7 @@ async function initGuild(c) {
   await commands.register(guild).catch((e) => console.error('[bot] Error registrando comandos:', e.message));
   await tickets.ensurePanel(guild).catch((e) => console.error('[tickets]', e.message));
   await antispam.ensureHoneypot(guild).catch((e) => console.error('[honeypot]', e.message));
+  await warns.rebuild(guild).catch((e) => console.error('[warns]', e.message));
 
   ready = true;
   const me = guild.members.me;

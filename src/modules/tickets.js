@@ -237,4 +237,4 @@ function init(client) {
   });
 }
 
-module.exports = { init, ensurePanel };
+module.exports = { init, ensurePanel, isStaff };

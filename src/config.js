@@ -88,6 +88,11 @@ module.exports = {
     emojiName: process.env.WELCOME_EMOJI || 'hola',
   },
 
+  warns: {
+    // castigo automático según el número de warns
+    punishments: { 3: 60 * 60_000, 5: 24 * 60 * 60_000 }, // 3 warns = 1 h aislado, 5 warns = 1 día
+  },
+
   boost: {
     channelId: process.env.BOOST_CHANNEL_ID || '1566958667410968656',
     emojiName: process.env.BOOST_EMOJI || 'boost', // emoji del server cuyo nombre contenga esto; si no hay, 💎

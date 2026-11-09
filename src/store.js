@@ -7,6 +7,7 @@ const FILE = path.join(DIR, 'store.json');
 const data = {
   whitelist: [],
   strikes: {}, // userId -> { count, last }
+  warns: {}, // userId -> [{ reason, by, at }]
   roleMembers: {}, // roleId protegido -> [userIds]
   roleRemap: {}, // id viejo -> id nuevo (si un rol protegido fue recreado)
   logChannelId: null, // si el canal de logs fue recreado
