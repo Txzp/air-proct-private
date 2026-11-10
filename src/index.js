@@ -14,6 +14,7 @@ const mg = require('./modules/mg');
 const stats = require('./modules/stats');
 const serverlogs = require('./modules/serverlogs');
 const vctime = require('./modules/vctime');
+const giveaway = require('./modules/giveaway');
 
 if (!cfg.token) {
   console.error('Falta DISCORD_TOKEN en las variables de entorno.');
@@ -55,10 +56,11 @@ boost.init(client);
 mg.init(client);
 serverlogs.init(client);
 vctime.init(client);
+giveaway.init(client);
 
 client.once(Events.ClientReady, async (c) => {
   console.log(`[bot] Conectado como ${c.user.tag}`);
-  c.user.setPresence({ activities: [{ name: 'protegiendo el server 🛡️', type: ActivityType.Watching }], status: 'online' });
+  c.user.setPresence({ activities: [{ name: 'Protegiendo 0km 👁️', type: ActivityType.Watching }], status: 'online' });
 
   for (const g of c.guilds.cache.values()) console.log(`[bot] Estoy en: ${g.name} — ID ${g.id}${g.id === cfg.guildId ? ' ✅ (protegido)' : ''}`);
   await initGuild(c);
@@ -81,6 +83,7 @@ async function initGuild(c) {
   await warns.rebuild(guild).catch((e) => console.error('[warns]', e.message));
   stats.start(c);
   await vctime.start(guild).catch((e) => console.error('[vctime]', e.message));
+  await giveaway.recover(guild).catch((e) => console.error('[giveaway]', e.message));
   await serverlogs.start(guild).catch((e) => console.error('[serverlogs]', e.message));
 
   ready = true;

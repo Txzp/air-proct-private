@@ -61,6 +61,12 @@ Bot anti-raid / anti-nuke / anti-spam hecho a medida para un solo server (`15666
 **`/mj mensaje`** (roles altos)
 - El bot dice el mensaje en el canal sin mostrar quién lo mandó. El comando es oculto (nadie ve que lo usaste). Sin @everyone/@here.
 
+**Giveaways `/pcreate`** (roles altos)
+- Formulario oculto: título/premio, ganadores (número o `random`), duración (`30s`, `10m`, `1h`, `2d`, `1h30m`) y descripción.
+- Mensaje con banner generado, cuenta regresiva en vivo y botones Participar · N / Participantes / Terminar.
+- Al terminar: se edita con banner de ganador, responde felicitando, DM al host y a los ganadores. Botón 🔁 Reroll.
+- `random` = el ganador sale de todo el server, participe o no.
+
 **Contador en vivo**
 - En el canal de stats el bot mantiene un mensaje (sin embed) con: @Boy 0km -> N, @Girl 0km -> N, Miembros Total y Online. Se edita cada 5 s si algo cambió.
 
