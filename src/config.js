@@ -111,6 +111,14 @@ module.exports = {
     ignoreChannels: list(process.env.SERVER_LOG_IGNORE_CHANNELS), // canales donde no registrar mensajes
   },
 
+  vcBoard: {
+    categoryId: process.env.VC_BOARD_CATEGORY_ID || '1566688764498026617',
+    channelName: '🏆┆𝗹𝗲𝗮𝗱𝗲𝗿𝗯𝗼𝗮𝗿𝗱-𝘃𝗰',
+    top: 20,
+    tickMs: 30_000, // suma tiempo cada 30 s
+    renderMs: 60_000, // actualiza el mensaje cada 1 min
+  },
+
   vcTime: {
     deleteAfterMs: 13_000, // !vc time se borra a los 13 s
   },

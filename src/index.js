@@ -15,6 +15,8 @@ const stats = require('./modules/stats');
 const serverlogs = require('./modules/serverlogs');
 const vctime = require('./modules/vctime');
 const giveaway = require('./modules/giveaway');
+const vcboard = require('./modules/vcboard');
+const db = require('./discordStore');
 
 if (!cfg.token) {
   console.error('Falta DISCORD_TOKEN en las variables de entorno.');
@@ -84,6 +86,9 @@ async function initGuild(c) {
   stats.start(c);
   await vctime.start(guild).catch((e) => console.error('[vctime]', e.message));
   await giveaway.recover(guild).catch((e) => console.error('[giveaway]', e.message));
+  await db.load(guild).catch((e) => console.error('[db]', e.message));
+  db.start();
+  await vcboard.start(guild, vctime.sessions).catch((e) => console.error('[vcboard]', e.message));
   await serverlogs.start(guild).catch((e) => console.error('[serverlogs]', e.message));
 
   ready = true;
@@ -102,6 +107,24 @@ client.on(Events.GuildCreate, async (g) => {
 });
 
 client.on(Events.Error, (e) => console.error('[client]', e));
+// Render manda SIGTERM antes de reiniciar/redeployar: guardamos todo antes de salir
+let shuttingDown = false;
+async function shutdown(sig) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  console.log(`[bot] ${sig} recibido, guardando datos...`);
+  try {
+    vcboard.flush(client.guilds.cache.get(cfg.guildId));
+    db.markDirty();
+    await Promise.race([db.save(), new Promise((r) => setTimeout(r, 8000))]);
+  } catch (e) {
+    console.error('[bot] Error al guardar:', e.message);
+  }
+  process.exit(0);
+}
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
+
 process.on('unhandledRejection', (e) => console.error('[unhandled]', e));
 process.on('uncaughtException', (e) => console.error('[uncaught]', e));
 

@@ -67,6 +67,11 @@ Bot anti-raid / anti-nuke / anti-spam hecho a medida para un solo server (`15666
 - Al terminar: se edita con banner de ganador, responde felicitando, DM al host y a los ganadores. Botón 🔁 Reroll.
 - `random` = el ganador sale de todo el server, participe o no.
 
+**Leaderboard VC**
+- El bot crea `🏆┆𝗹𝗲𝗮𝗱𝗲𝗿𝗯𝗼𝗮𝗿𝗱-𝘃𝗰` en la categoría de vc y mantiene un mensaje (sin embed) con el top 20: `@user -> **67h 12m**` (🔴 = en vc ahora). Se actualiza cada minuto.
+- El tiempo se **acumula** para siempre (salir de vc no lo borra). `!vc time` también muestra el total.
+- Los datos se guardan en el canal oculto `airprotect-data` (no borrarlo), así sobreviven a los redeploys de Render.
+
 **Contador en vivo**
 - En el canal de stats el bot mantiene un mensaje (sin embed) con: @Boy 0km -> N, @Girl 0km -> N, Miembros Total y Online. Se edita cada 5 s si algo cambió.
 

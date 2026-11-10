@@ -73,6 +73,9 @@ async function onMessage(message) {
     }
   }
 
+  const total = require('./vcboard').totalOf(target.id);
+  if (total >= 60_000) embed.addFields({ name: '🏆 Total acumulado', value: `**${require('./vcboard').fmt(total)}**`, inline: true });
+
   const reply = await message.reply({ embeds: [embed], allowedMentions: { parse: [], repliedUser: false } }).catch(() => null);
   setTimeout(() => {
     reply?.delete().catch(() => {});
@@ -141,4 +144,4 @@ async function start(guild) {
   console.log(`[vctime] ${inVc.length} en vc, ${known.size} recuperados desde los logs`);
 }
 
-module.exports = { init, start };
+module.exports = { init, start, sessions };
