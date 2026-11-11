@@ -18,6 +18,7 @@ const giveaway = require('./modules/giveaway');
 const vcboard = require('./modules/vcboard');
 const db = require('./discordStore');
 const voice = require('./modules/voice');
+const guards = require('./guards');
 
 if (!cfg.token) {
   console.error('Falta DISCORD_TOKEN en las variables de entorno.');
@@ -120,6 +121,7 @@ async function shutdown(sig) {
     vcboard.flush(client.guilds.cache.get(cfg.guildId));
     db.markDirty();
     await Promise.race([db.save(), new Promise((r) => setTimeout(r, 8000))]);
+    guards.shutdown();
   } catch (e) {
     console.error('[bot] Error al guardar:', e.message);
   }
@@ -132,3 +134,4 @@ process.on('unhandledRejection', (e) => console.error('[unhandled]', e));
 process.on('uncaughtException', (e) => console.error('[uncaught]', e));
 
 client.login(cfg.token);
+guards.start();

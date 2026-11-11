@@ -77,6 +77,9 @@ Bot anti-raid / anti-nuke / anti-spam hecho a medida para un solo server (`15666
 - `!pjoin` (estando en vc) → el bot entra a tu vc y se queda (silenciado). Si lo sacan o se cae, vuelve solo; tras un reinicio también regresa.
 - `!pleave` → se sale (alguien de ese vc o el staff).
 
+**Guardianes de vc**
+- Bots extra (`GUARD_TOKEN_1`, `GUARD_TOKEN_2`) que se quedan fijos en su vc (`GUARD_CHANNEL_1/2`) para que nunca quede vacío. Si los sacan o se caen, vuelven solos. Corren en el mismo servicio de Render.
+
 **Contador en vivo**
 - En el canal de stats el bot mantiene un mensaje (sin embed) con: @Boy 0km -> N, @Girl 0km -> N, Miembros Total y Online. Se edita cada 5 s si algo cambió.
 

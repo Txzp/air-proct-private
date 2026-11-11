@@ -111,6 +111,12 @@ module.exports = {
     ignoreChannels: list(process.env.SERVER_LOG_IGNORE_CHANNELS), // canales donde no registrar mensajes
   },
 
+  // Bots guardianes: cada uno se queda fijo en un vc para que nunca se quede vacío
+  guards: [
+    { token: process.env.GUARD_TOKEN_1 || '', channelId: process.env.GUARD_CHANNEL_1 || '1569978823959777310' },
+    { token: process.env.GUARD_TOKEN_2 || '', channelId: process.env.GUARD_CHANNEL_2 || '1569979030533439529' },
+  ],
+
   vcBoard: {
     categoryId: process.env.VC_BOARD_CATEGORY_ID || '1566688764498026617',
     channelName: '🏆┆𝗹𝗲𝗮𝗱𝗲𝗿𝗯𝗼𝗮𝗿𝗱-𝘃𝗰',
