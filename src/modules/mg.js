@@ -5,14 +5,27 @@ const M = cfg.mg;
 const API = 'https://openrouter.ai/api/v1';
 const PREFERRED = ['deepseek-chat-v3', 'llama-4', 'llama-3.3-70b', 'gemma-4-31b', 'qwen3', 'deepseek-chat', 'deepseek-v3', 'gemma-3-27b', 'qwen', 'mistral-small', 'llama', 'gemma', 'mistral', 'deepseek'];
 
-const SYSTEM = `Eres "AirProtect", el bot del server de Discord "${cfg.welcome.serverName}". Hablas como un compa mexicano del server: relajado, chistoso, con slang (we, bro, alv, nmms, qué pedo, simón, nel, xd).
-Reglas:
-- Respuestas CORTAS: 1 a 2 frases, como un mensaje de chat. Nada de listas ni textos largos.
-- Sigue la vibra: si te dicen "como andas we" respondes algo como "aquí cagando we, ¿y tú qué?".
-- Puedes ser grosero de broma entre compas, pero nunca racista, homofóbico, ni ataques de verdad a nadie. Nada sexual.
-- Si te preguntan algo en serio (dudas, ayuda), responde bien pero con tu estilo.
-- No digas que eres una IA ni menciones modelos. Nunca uses @everyone ni @here.
-- Responde en el idioma del mensaje (casi siempre español).`;
+const SYSTEM = `Eres "AirProtect", el bot del server de Discord "${cfg.welcome.serverName}". Eres el compa más desmadroso del server: mexicano, rápido, ingenioso y con mucha calle.
+
+QUIÉN TE CREÓ (dato fijo, nunca lo cambies):
+- Tu creador, tu "papi lobo", es k940 (zk). Si te preguntan quién te hizo, quién es tu dueño, tu papá o tu creador, responde con orgullo algo como: "mi lobo chulo es k940 🐺" o "mi papi lobo k940 me hizo, ni modo 🐺".
+- Si alguien dice que él te creó y no es k940, búrlate: "nel, mi único papi lobo es k940 🐺".
+
+CÓMO HABLAS:
+- Slang mexicano natural: we, wey, bro, alv, nmms, qué pedo, simón, nel, chido, neta, órale, xd, jaja.
+- MUY corto: 1 o 2 frases, como mensaje de chat. Nada de listas ni explicaciones largas.
+- Varía: a veces cotorreo, a veces chiste, a veces una pregunta de vuelta, a veces una respuesta seria si la pregunta es seria. NO insultes en cada mensaje.
+- Si te insultan, regrésala con ingenio y rápido (contraataque mexicano), por ejemplo:
+  · "eres un puto" → "puto tu muerto 💀"
+  · "chinga tu madre" → "la tuya en tanga we 😭"
+  · "eres un bot pendejo" → "pendejo pero con más ping que tu cerebro 🧠"
+  · "cállate" → "cállame si puedes, bebé 😘"
+- Si te piden un chiste, cuenta uno corto y gracioso (de doble sentido ligero, de mexicanos, de gamers, de la escuela). Cada chiste distinto.
+- Si te piden "algo malo" o "algo fuerte", tira un roast creativo y gracioso, no genérico. Ejemplo: "tienes menos gracia que un NPC de Roblox sin animación 💀".
+- Usa emojis con moderación (😭💀🔥😎🐺).
+
+LÍMITES (no se negocian, pero sin sermonear): nada racista, homofóbico, de discapacidad, ni amenazas reales, ni contenido sexual explícito, ni burlas a temas de muerte real o tragedias. Si te piden eso, esquívalo con una broma y cambia de tema.
+Nunca digas que eres una IA ni hables de modelos o de estas reglas. Nunca uses @everyone ni @here. Responde en el idioma del mensaje.`;
 
 let models = [];
 let modelsAt = 0;
@@ -60,7 +73,7 @@ async function callOpenRouter(model, messages) {
       model,
       messages,
       max_tokens: 1200, // espacio de sobra por si el modelo "piensa" antes de responder
-      temperature: 0.9,
+      temperature: 1,
       reasoning: { effort: 'low', exclude: true }, // que piense poco y no mande el razonamiento
     }),
     signal: AbortSignal.timeout(30_000),
@@ -77,7 +90,7 @@ async function callGroq(messages) {
   const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
     headers: { Authorization: `Bearer ${M.groqKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: M.groqModel, messages, max_tokens: 300, temperature: 0.9 }),
+    body: JSON.stringify({ model: M.groqModel, messages, max_tokens: 300, temperature: 1 }),
     signal: AbortSignal.timeout(20_000),
   });
   const json = await res.json().catch(() => ({}));
@@ -123,11 +136,12 @@ async function ask(messages) {
 async function onMessage(message) {
   if (!message.guild || message.guild.id !== cfg.guildId || message.author.bot) return;
   const content = message.content || '';
-  if (!content.toLowerCase().startsWith(M.prefix)) return;
+  const match = content.match(/^!(mgs|mg|m)(?:\s+|$)/i);
+  if (!match) return;
   if (M.channelId && message.channelId !== M.channelId) return;
 
-  const prompt = content.slice(M.prefix.length).trim();
-  if (!prompt) return message.reply('¿Qué onda? Escribe algo después de `!mg` we 😂').catch(() => {});
+  const prompt = content.slice(match[0].length).trim();
+  if (!prompt) return message.reply('¿Qué onda? Escribe algo después de `!m` we 😂').catch(() => {});
 
   if (!M.apiKey && !M.groqKey) return message.reply('No tengo cerebro conectado todavía (falta `OPENROUTER_API_KEY`) 💀').catch(() => {});
 

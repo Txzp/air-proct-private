@@ -43,8 +43,8 @@ Bot anti-raid / anti-nuke / anti-spam hecho a medida para un solo server (`15666
 - `/warn @user mensaje` → DM al usuario con el motivo, aviso en el canal y log. 3 warns = aislado 1 h, 5 warns = aislado 1 día.
 - `/warns @user` para ver su historial, `/clearwarns @user` para borrarlo. Se reconstruyen desde los logs si Render reinicia.
 
-**Charla `!mg`**
-- `!mg como andas we` → el bot responde (reply) con personalidad de compa. Usa modelos gratis de OpenRouter (los detecta solo y cambia de modelo si uno falla). Recuerda la plática reciente del canal. Cooldown de 5 s por usuario.
+**Charla `!m`** (también `!mg`)
+- `!m como andas we` → el bot responde (reply) con personalidad de compa: cotorreo, chistes y contraataques ("eres un puto" → "puto tu muerto 💀"). Su creador: k940 🐺. Usa modelos gratis de OpenRouter (los detecta solo y cambia de modelo si uno falla). Recuerda la plática reciente del canal. Cooldown de 5 s por usuario.
 - Variables: `OPENROUTER_API_KEY` (obligatoria), `MG_CHANNEL_ID` (opcional), `MG_MODEL` (opcional).
 
 **Logs del servidor** (canal privado del staff)
@@ -71,6 +71,10 @@ Bot anti-raid / anti-nuke / anti-spam hecho a medida para un solo server (`15666
 - El bot crea `🏆┆𝗹𝗲𝗮𝗱𝗲𝗿𝗯𝗼𝗮𝗿𝗱-𝘃𝗰` en la categoría de vc y mantiene un mensaje (sin embed) con el top 20: `@user -> **67h 12m**` (🔴 = en vc ahora). Se actualiza cada minuto.
 - El tiempo se **acumula** para siempre (salir de vc no lo borra). `!vc time` también muestra el total.
 - Los datos se guardan en el canal oculto `airprotect-data` (no borrarlo), así sobreviven a los redeploys de Render.
+
+**`!pjoin` / `!pleave`**
+- `!pjoin` (estando en vc) → el bot entra a tu vc y se queda (silenciado). Si lo sacan o se cae, vuelve solo; tras un reinicio también regresa.
+- `!pleave` → se sale (alguien de ese vc o el staff).
 
 **Contador en vivo**
 - En el canal de stats el bot mantiene un mensaje (sin embed) con: @Boy 0km -> N, @Girl 0km -> N, Miembros Total y Online. Se edita cada 5 s si algo cambió.
