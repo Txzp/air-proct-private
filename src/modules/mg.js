@@ -1,6 +1,8 @@
 const { Events } = require('discord.js');
 const cfg = require('../config');
 const db = require('../discordStore');
+const { isTrusted } = require('../trust');
+const { log } = require('../logger');
 
 const CREATOR_ID = '303188562168250369'; // k940
 
@@ -21,7 +23,8 @@ PARA QUÉ SIRVES (lo que haces en ${S}):
 - Tickets de soporte, bienvenidas con tarjeta, tarjetas de boost, logs de todo lo que pasa, contador de boys/girls/online, leaderboard de tiempo en vc y giveaways.
 
 COMANDOS QUE PUEDES EXPLICAR:
-- !m <mensaje> → hablar contigo. !m modo serio | !m modo chistes | !m modo insulton → cambiar cómo les hablas. !m modo → ver su modo.
+- !m <mensaje> → hablar contigo. Tu tono se adapta solo a cómo te escriben.
+- Staff: "!m silencia a @alguien 10m" / "!m quítale el silencio a @alguien" → tú lo silencias o lo desilencias (solo obedeces al staff).
 - !vc time (o !vc time @alguien) → cuánto tiempo llevan en vc y su total acumulado.
 - !pjoin → entras al vc de quien lo pide y te quedas ahí. !pleave → te sales.
 - Comandos de staff (/): /warn, /warns, /clearwarns, /pcreate (crear giveaway), /lockdown, /unlock, /raidmode, /whitelist, /status, /strikes, /resetstrikes. Solo los usan roles altos.
@@ -55,16 +58,100 @@ const MODES = {
 - Corto: 1 o 2 frases.`,
   },
 };
-const DEFAULT_MODE = 'chistes';
-const MODE_ALIASES = { serio: 'serio', seria: 'serio', chiste: 'chistes', chistes: 'chistes', gracioso: 'chistes', insulton: 'insulton', insultón: 'insulton', insultos: 'insulton', toxico: 'insulton', tóxico: 'insulton' };
+// El tono sale solo según cómo le escriben (sin comandos)
+const INSULT_RE = /\b(put[oa]s?|pendej[oa]s?|verga|chinga|chingues|chingada|mam[oó]n|mamona|culer[oa]|idiota|imb[eé]cil|est[uú]pid[oa]|cabr[oó]n|perr[oa]|maric[oó]n|joto|naco|zorra|basura|in[uú]til|tonto|tonta|bobo|mierda|c[aá]llate|alv|ctm|hdp|stfu|stupid|dumb|bitch|fuck)\b/i;
+const SERIOUS_RE = /\b(c[oó]mo|qu[eé] (es|son|hace|haces|sirve|significa)|para qu[eé]|cu[aá]l(es)?|cu[aá]ndo|d[oó]nde|por qu[eé]|ayuda|ay[uú]dame|explica|expl[ií]came|comando|comandos|funciona|ticket|regla|reglas|reportar|problema|error|no puedo|necesito|duda|consejo)\b/i;
 
-function modeOf(userId) {
-  const modes = db.get('mgModes', {});
-  return MODES[modes[userId]] ? modes[userId] : DEFAULT_MODE;
+function detectMode(text) {
+  if (INSULT_RE.test(text)) return 'insulton';
+  if (SERIOUS_RE.test(text) && (text.includes('?') || text.split(/\s+/).length > 4)) return 'serio';
+  return 'chistes';
 }
 
-function systemFor(userId, userName) {
-  return `${IDENTITY}\n\n${MODES[modeOf(userId)].prompt}\n\nEstás hablando con "${userName}"${userId === CREATOR_ID ? ' — ¡es k940, tu creador! Trátalo como tu papi lobo 🐺' : ''}.`;
+// Ejemplos de cómo debe sonar (los modelos chicos copian el estilo de aquí)
+const EXAMPLES = {
+  chistes: [
+    ['hola', '¡Qué onda! ¿Qué se te ofrece, compa? 😎'],
+    ['como andas', 'Aquí nomás, cuidando el server como perro guardián 🐺 ¿y tú qué?'],
+    ['cuentame un chiste', '¿Qué le dijo un jaguar a otro jaguar? Jaguar you 🐆😭'],
+  ],
+  serio: [
+    ['como abro un ticket?', 'Ve al canal de tickets y dale al botón 🎫 "Abrir ticket". Se te abre un canal privado con el staff.'],
+    ['para que sirves', 'Protejo 0km de raids, nukes y spam, y además manejo tickets, bienvenidas, logs, giveaways y el leaderboard de vc 🛡️'],
+  ],
+  insulton: [
+    ['eres un puto', 'Puto tu muerto 💀'],
+    ['callate bot pendejo', 'Pendejo pero con más ping que tu cerebro 🧠'],
+  ],
+};
+
+function systemFor(mode, userId, userName) {
+  const creator = userId === CREATOR_ID;
+  return `${IDENTITY}\n\n${MODES[mode].prompt}\n\nREGLA CLAVE: responde SOLO al último mensaje, de forma natural y coherente con lo que te dijeron. Si te saludan, saluda. Si te preguntan, responde. No inventes insultos que nadie dijo ni metas temas raros. Nada de presentarte en cada mensaje.\n\nEstás hablando con "${userName}"${creator ? ' — es k940, tu creador (tu papi lobo 🐺). Con él eres leal y cariñoso a tu estilo; puedes llamarlo "papi lobo" de vez en cuando, no en cada mensaje.' : '.'}`;
+}
+
+function examplesFor(mode) {
+  return EXAMPLES[mode].flatMap(([u, a]) => [
+    { role: 'user', content: u },
+    { role: 'assistant', content: a },
+  ]);
+}
+
+/* ---------- Moderación por orden (solo staff; decide el código, no la IA) ---------- */
+const MUTE_RE = /^(?:oye\s+)?(?:silencia(?:me|le)?|silencialo|silenciala|mutea(?:lo|la)?|mutear|mute|a[ií]sla(?:lo|la)?|calla(?:lo|la)?|timeout)\b/i;
+const UNMUTE_RE = /^(?:oye\s+)?(?:desilencia(?:lo|la)?|desmutea(?:lo|la)?|unmute|quita(?:le)?\s+(?:el\s+)?(?:silencio|mute|aislamiento|timeout))\b/i;
+
+function parseTime(text) {
+  const m = text.match(/(\d+)\s*(s|seg|segundos?|m|min|minutos?|h|hrs?|horas?|d|d[ií]as?)\b/i);
+  if (!m) return 5 * 60_000;
+  const n = parseInt(m[1], 10);
+  const u = m[2][0].toLowerCase();
+  const ms = n * (u === 's' ? 1e3 : u === 'm' ? 6e4 : u === 'h' ? 36e5 : 864e5);
+  return Math.min(Math.max(ms, 10_000), 28 * 864e5);
+}
+
+function fmtTime(ms) {
+  if (ms >= 864e5) return `${Math.round(ms / 864e5)} día(s)`;
+  if (ms >= 36e5) return `${Math.round(ms / 36e5)} h`;
+  if (ms >= 6e4) return `${Math.round(ms / 6e4)} min`;
+  return `${Math.round(ms / 1000)} s`;
+}
+
+async function moderation(message, prompt) {
+  const isMute = MUTE_RE.test(prompt);
+  const isUnmute = !isMute && UNMUTE_RE.test(prompt);
+  if (!isMute && !isUnmute) return false;
+  const target = message.mentions.members.first();
+  if (!target) return false; // sin @ → es plática normal
+
+  const guild = message.guild;
+  const { isStaff } = require('./tickets');
+  if (!isTrusted(guild, message.author.id) && !isStaff(message.member)) {
+    await message.reply(`Jaja ¿y tú quién eres para darme órdenes? 😭 Solo el staff me manda.`).catch(() => {});
+    return true;
+  }
+  if (target.id === message.client.user.id) {
+    await message.reply('¿Silenciarme a mí? Nel, yo soy el que silencia aquí 😎').catch(() => {});
+    return true;
+  }
+  if (target.id === CREATOR_ID || isTrusted(guild, target.id)) {
+    await message.reply(target.id === CREATOR_ID ? 'A mi papi lobo no lo toco ni de chiste 🐺' : 'Ese es staff, no lo puedo silenciar 🤝').catch(() => {});
+    return true;
+  }
+
+  if (isMute) {
+    const ms = parseTime(prompt.replace(/<@!?\d+>/g, ''));
+    const ok = await target.timeout(ms, `AirProtect: ordenado por ${message.author.tag}`).then(() => true).catch(() => false);
+    await message
+      .reply(ok ? `Listo, ${target} calladito por **${fmtTime(ms)}** 🤐` : `No pude silenciar a ${target} 😓 (¿tiene un rol más alto que yo?)`)
+      .catch(() => {});
+    if (ok) log('warn', 'Silenciado por orden', `${message.author} mandó a silenciar a ${target} (\`${target.id}\`) por **${fmtTime(ms)}** usando !m.`);
+  } else {
+    const ok = await target.timeout(null, `AirProtect: ordenado por ${message.author.tag}`).then(() => true).catch(() => false);
+    await message.reply(ok ? `Ya puede hablar ${target}, pórtate bien eh 👀` : `No pude quitarle el silencio a ${target} 😓`).catch(() => {});
+    if (ok) log('ok', 'Silencio quitado por orden', `${message.author} le quitó el silencio a ${target} (\`${target.id}\`) usando !m.`);
+  }
+  return true;
 }
 
 let models = [];
@@ -182,19 +269,8 @@ async function onMessage(message) {
 
   const prompt = content.slice(match[0].length).trim();
 
-  // !m modo [serio|chistes|insulton]
-  const modeCmd = prompt.match(/^modo(?:\s+(\S+))?$/i);
-  if (modeCmd) {
-    const wanted = MODE_ALIASES[(modeCmd[1] || '').toLowerCase()];
-    if (!modeCmd[1]) {
-      return message.reply(`Tu modo es **${MODES[modeOf(message.author.id)].label}**. Cámbialo con \`!m modo serio\`, \`!m modo chistes\` o \`!m modo insulton\``).catch(() => {});
-    }
-    if (!wanted) return message.reply('Modos: `serio`, `chistes` o `insulton` 🤨').catch(() => {});
-    db.get('mgModes', {})[message.author.id] = wanted;
-    db.markDirty();
-    const msgs = { serio: 'Va, me pongo serio contigo 🧠', chistes: 'Modo payaso activado 🤡😂', insulton: 'Ah, ¿quieres guerra? Modo insultón activado 💀' };
-    return message.reply(`${msgs[wanted]} (**${MODES[wanted].label}**)`).catch(() => {});
-  }
+  // Moderación por voz: "!m silencia a @alguien 10m" (solo staff, la IA no decide)
+  if (await moderation(message, prompt)) return;
   if (!prompt) return message.reply('¿Qué onda? Escribe algo después de `!m` we 😂').catch(() => {});
 
   if (!M.apiKey && !M.groqKey) return message.reply('No tengo cerebro conectado todavía (falta `OPENROUTER_API_KEY`) 💀').catch(() => {});
@@ -210,7 +286,9 @@ async function onMessage(message) {
   await message.channel.sendTyping().catch(() => {});
 
   try {
-    const answer = await ask([{ role: 'system', content: systemFor(message.author.id, message.member?.displayName || message.author.username) }, ...hist, userMsg]);
+    const mode = detectMode(prompt);
+    const name = message.member?.displayName || message.author.username;
+    const answer = await ask([{ role: 'system', content: systemFor(mode, message.author.id, name) }, ...examplesFor(mode), ...hist, userMsg]);
     await message.reply({ content: answer, allowedMentions: { repliedUser: true, parse: [] } });
     hist.push(userMsg, { role: 'assistant', content: answer });
     history.set(message.channelId, hist.slice(-M.memory * 2));

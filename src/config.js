@@ -102,7 +102,7 @@ module.exports = {
     groqModel: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
     prefix: '!m', // también acepta !mg y !mgs
     cooldownMs: num(process.env.MG_COOLDOWN_MS, 5_000),
-    memory: 6, // recuerda los últimos 6 intercambios del canal
+    memory: 3, // recuerda los últimos 3 intercambios del canal (más = se confunde)
   },
 
   // Logs del servidor (canal privado del staff): entradas/salidas, roles, canales, mensajes, voz...
