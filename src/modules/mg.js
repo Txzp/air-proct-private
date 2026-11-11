@@ -106,7 +106,7 @@ const EXAMPLES = {
 
 function systemFor(mode, userId, userName) {
   const creator = userId === CREATOR_ID;
-  return `${IDENTITY}\n\n${MODES[mode].prompt}\n\nREGLA CLAVE: responde SOLO al último mensaje, de forma natural y coherente con lo que te dijeron. Si te saludan, saluda. Si te preguntan, responde. No inventes insultos que nadie dijo ni metas temas raros. Nada de presentarte en cada mensaje.\n\nEstás hablando con "${userName}"${creator ? ' — es k940, tu creador (tu papi lobo 🐺). Con él eres leal y cariñoso a tu estilo; puedes llamarlo "papi lobo" de vez en cuando, no en cada mensaje.' : '.'}`;
+  return `${IDENTITY}\n\n${MODES[mode].prompt}\n\nREGLA CLAVE: responde SOLO al último mensaje, de forma natural y coherente con lo que te dijeron. Si te saludan, saluda. Si te preguntan, responde. No inventes insultos que nadie dijo ni metas temas raros. Nada de presentarte en cada mensaje.\nSi alguien te cuenta que OTRA persona te insultó o habló mal de ti (\"el @fulano dijo que eres...\"), defiéndete y roastea a ESA persona (@fulano) por su nombre, no a quien te avisó. No ofrezcas silenciar a nadie ni hables de comandos en ese caso: solo humíllalo con ingenio.\n\nEstás hablando con "${userName}"${creator ? ' — es k940, tu creador (tu papi lobo 🐺). Con él eres leal y cariñoso a tu estilo; puedes llamarlo "papi lobo" de vez en cuando, no en cada mensaje.' : '.'}`;
 }
 
 function examplesFor(mode) {
@@ -233,30 +233,82 @@ async function callOpenRouter(model, messages) {
 }
 
 // Respaldo opcional: Groq (gratis, muy rápido) si pones GROQ_API_KEY
-async function callGroq(messages) {
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+// Groq: se elige el mejor modelo disponible (Groq retira modelos seguido)
+const GROQ_API = 'https://api.groq.com/openai/v1';
+const GROQ_PREFERRED = ['llama-3.3-70b-versatile', 'moonshotai/kimi-k2', 'openai/gpt-oss-120b', 'minimaxai/minimax', 'qwen/qwen3', 'meta-llama/llama-4', 'openai/gpt-oss-20b', 'llama-3.1-8b-instant'];
+let groqModels = [];
+let groqModelsAt = 0;
+
+async function loadGroqModels() {
+  if (!M.groqKey) return [];
+  if (M.groqModel) return [M.groqModel];
+  if (groqModels.length && Date.now() - groqModelsAt < 6 * 60 * 60_000) return groqModels;
+  try {
+    const res = await fetch(`${GROQ_API}/models`, { headers: { Authorization: `Bearer ${M.groqKey}` }, signal: AbortSignal.timeout(10_000) });
+    const { data } = await res.json();
+    const ids = data.filter((m) => m.active !== false && !/whisper|tts|orpheus|guard|playai|distil|compound/i.test(m.id)).map((m) => m.id);
+    const score = (id) => {
+      const i = GROQ_PREFERRED.findIndex((p) => id.startsWith(p));
+      return i === -1 ? 50 : i;
+    };
+    groqModels = ids.sort((a, b) => score(a) - score(b)).slice(0, 5);
+    groqModelsAt = Date.now();
+    console.log('[mg] Modelos Groq:', groqModels.join(', ') || 'ninguno');
+  } catch (e) {
+    console.error('[mg] No pude listar modelos de Groq:', e.message);
+    if (!groqModels.length) groqModels = ['openai/gpt-oss-120b', 'llama-3.3-70b-versatile'];
+  }
+  return groqModels;
+}
+
+const REFUSAL_RE = /\b(i can'?t|i cannot|i'?m sorry|lo siento,? (pero )?no puedo|no puedo (ayudar|hacer|responder|cumplir)|no es apropiado|as an ai|como (una )?ia)\b/i;
+
+async function callGroq(model, messages) {
+  const reasoning = /gpt-oss|qwen3|deepseek-r1/i.test(model);
+  const res = await fetch(`${GROQ_API}/chat/completions`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${M.groqKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: M.groqModel, messages, max_tokens: 450, temperature: 1 }),
-    signal: AbortSignal.timeout(20_000),
+    body: JSON.stringify({
+      model,
+      messages,
+      max_tokens: reasoning ? 1200 : 450,
+      temperature: 1,
+      ...(reasoning ? { reasoning_effort: /gpt-oss/i.test(model) ? 'low' : undefined, reasoning_format: 'hidden' } : {}),
+    }),
+    signal: AbortSignal.timeout(25_000),
   });
   const json = await res.json().catch(() => ({}));
   const text = clean(json.choices?.[0]?.message?.content || '');
-  if (res.ok && text) return text;
-  throw new Error(json.error?.message || `HTTP ${res.status}`);
+  if (res.ok && text) {
+    if (REFUSAL_RE.test(text)) throw new Error('el modelo se negó a responder');
+    return text;
+  }
+  throw new Error(json.error?.message || (res.ok ? 'respuesta vacía' : `HTTP ${res.status}`));
 }
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const badUntil = new Map(); // modelo -> hasta cuándo se salta (falló hace poco)
 
 async function ask(messages) {
-  const list = await loadModels();
   let lastErr = 'sin modelos disponibles';
-  // 2 vueltas: si todos fallan la primera, espera un poco y reintenta (los free se saturan a ratos)
   for (let round = 0; round < 2; round++) {
     const now = Date.now();
-    const order = [...list.filter((m) => (badUntil.get(m) || 0) < now), ...list.filter((m) => (badUntil.get(m) || 0) >= now)];
-    for (const model of order) {
+    // 1) Groq (rápido y más listo)
+    const groq = await loadGroqModels();
+    for (const model of [...groq.filter((m) => (badUntil.get(m) || 0) < now), ...groq.filter((m) => (badUntil.get(m) || 0) >= now)]) {
+      try {
+        const text = await callGroq(model, messages);
+        badUntil.delete(model);
+        return text;
+      } catch (e) {
+        lastErr = e.message;
+        badUntil.set(model, Date.now() + (/rate|limit|429/i.test(e.message) ? 60_000 : 2 * 60_000));
+        console.warn(`[mg] groq ${model} falló: ${e.message}`);
+      }
+    }
+    // 2) OpenRouter (respaldo)
+    const list = await loadModels();
+    for (const model of [...list.filter((m) => (badUntil.get(m) || 0) < now), ...list.filter((m) => (badUntil.get(m) || 0) >= now)]) {
       try {
         const text = await callOpenRouter(model, messages);
         badUntil.delete(model);
@@ -265,14 +317,6 @@ async function ask(messages) {
         lastErr = e.message;
         badUntil.set(model, Date.now() + 2 * 60_000);
         console.warn(`[mg] ${model} falló: ${e.message}`);
-      }
-    }
-    if (M.groqKey) {
-      try {
-        return await callGroq(messages);
-      } catch (e) {
-        lastErr = e.message;
-        console.warn(`[mg] groq falló: ${e.message}`);
       }
     }
     if (round === 0) await sleep(2000);
@@ -302,7 +346,12 @@ async function onMessage(message) {
   cooldown.set(message.author.id, now);
 
   const hist = history.get(message.channelId) || [];
-  const userMsg = { role: 'user', content: `${message.member?.displayName || message.author.username}: ${prompt.slice(0, 800)}` };
+  const readable = prompt
+    .replace(/<@!?(\d+)>/g, (_, id) => `@${message.guild.members.cache.get(id)?.displayName || message.mentions.users.get(id)?.username || 'alguien'}`)
+    .replace(/<@&(\d+)>/g, (_, id) => `@${message.guild.roles.cache.get(id)?.name || 'rol'}`)
+    .replace(/<#(\d+)>/g, (_, id) => `#${message.guild.channels.cache.get(id)?.name || 'canal'}`)
+    .replace(/<a?:(\w+):\d+>/g, ':$1:');
+  const userMsg = { role: 'user', content: `${message.member?.displayName || message.author.username}: ${readable.slice(0, 800)}` };
   await message.channel.sendTyping().catch(() => {});
 
   try {

@@ -99,7 +99,7 @@ module.exports = {
     model: process.env.MG_MODEL || '', // vacío = elige solo entre los modelos :free
     channelId: process.env.MG_CHANNEL_ID || '', // vacío = funciona en cualquier canal
     groqKey: process.env.GROQ_API_KEY || '', // opcional, respaldo gratis (console.groq.com)
-    groqModel: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
+    groqModel: process.env.GROQ_MODEL || '', // vacío = elige solo el mejor disponible
     prefix: '!m', // también acepta !mg y !mgs
     cooldownMs: num(process.env.MG_COOLDOWN_MS, 5_000),
     memory: 3, // recuerda los últimos 3 intercambios del canal (más = se confunde)
