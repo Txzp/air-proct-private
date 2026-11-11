@@ -19,6 +19,7 @@ const vcboard = require('./modules/vcboard');
 const db = require('./discordStore');
 const voice = require('./modules/voice');
 const guards = require('./guards');
+const tempvc = require('./modules/tempvc');
 
 if (!cfg.token) {
   console.error('Falta DISCORD_TOKEN en las variables de entorno.');
@@ -62,6 +63,7 @@ serverlogs.init(client);
 vctime.init(client);
 giveaway.init(client);
 voice.init(client);
+tempvc.init(client);
 
 client.once(Events.ClientReady, async (c) => {
   console.log(`[bot] Conectado como ${c.user.tag}`);
@@ -93,6 +95,7 @@ async function initGuild(c) {
   db.start();
   await vcboard.start(guild, vctime.sessions).catch((e) => console.error('[vcboard]', e.message));
   await voice.start(guild).catch((e) => console.error('[voice]', e.message));
+  await tempvc.start(guild).catch((e) => console.error('[tempvc]', e.message));
   await serverlogs.start(guild).catch((e) => console.error('[serverlogs]', e.message));
 
   ready = true;

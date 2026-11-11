@@ -111,6 +111,13 @@ module.exports = {
     ignoreChannels: list(process.env.SERVER_LOG_IGNORE_CHANNELS), // canales donde no registrar mensajes
   },
 
+  // Vc temporales propios
+  tempVc: {
+    categoryId: process.env.TEMPVC_CATEGORY_ID || '1566693067317059645',
+    creatorName: '➕┆𝗩𝗰 𝗖𝗿𝗲𝗮𝘁𝗼𝗿',
+    emptyDeleteMs: num(process.env.TEMPVC_EMPTY_HOURS, 12) * 60 * 60_000, // se borra tras 12 h vacío (el dueño puede borrarlo antes)
+  },
+
   // Bots guardianes: cada uno se queda fijo en un vc para que nunca se quede vacío
   guards: [
     { token: process.env.GUARD_TOKEN_1 || '', channelId: process.env.GUARD_CHANNEL_1 || '1569978823959777310' },

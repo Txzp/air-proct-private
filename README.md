@@ -77,6 +77,10 @@ Bot anti-raid / anti-nuke / anti-spam hecho a medida para un solo server (`15666
 - `!pjoin` (estando en vc) → el bot entra a tu vc y se queda (silenciado). Si lo sacan o se cae, vuelve solo; tras un reinicio también regresa.
 - `!pleave` → se sale (alguien de ese vc o el staff).
 
+**Vc temporales propios** (reemplazo de TempVoice)
+- Entras a `➕┆𝗩𝗰 𝗖𝗿𝗲𝗮𝘁𝗼𝗿` → se crea tu vc y te mueve. En su chat: **Vc Own: @tú** + botones (nombre/status, límite, cerrar, ocultar, sacar, pasar el vc, borrar).
+- Si te sales, el vc sigue y sigues siendo el dueño. Se borra solo tras 12 h vacío (`TEMPVC_EMPTY_HOURS`) o cuando el dueño le da a Borrar.
+
 **Guardianes de vc**
 - Bots extra (`GUARD_TOKEN_1`, `GUARD_TOKEN_2`) que se quedan fijos en su vc (`GUARD_CHANNEL_1/2`) para que nunca quede vacío. Si los sacan o se caen, vuelven solos. Corren en el mismo servicio de Render.
 
