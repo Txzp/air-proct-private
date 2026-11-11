@@ -7,7 +7,11 @@ const FONTS = path.join(__dirname, '..', '..', 'assets', 'fonts');
 GlobalFonts.registerFromPath(path.join(FONTS, 'Poppins-Bold.ttf'), 'Poppins');
 GlobalFonts.registerFromPath(path.join(FONTS, 'DejaVuSans-Bold.ttf'), 'DejaVu');
 GlobalFonts.registerFromPath(path.join(FONTS, 'NotoColorEmoji.ttf'), 'Emoji');
-const FONT_STACK = 'Poppins, DejaVu, Emoji, sans-serif';
+// Letras "fancy" de los nombres (𝕸𝖊𝖑𝖆𝖓𝖞), japonés (ミ 彡) y otros símbolos (꧁꧂)
+GlobalFonts.registerFromPath(path.join(FONTS, 'FancyMath.ttf'), 'FancyMath');
+GlobalFonts.registerFromPath(path.join(FONTS, 'CJK.otf'), 'CJK');
+GlobalFonts.registerFromPath(path.join(FONTS, 'Extra.otf'), 'Extra');
+const FONT_STACK = 'Poppins, DejaVu, FancyMath, CJK, Extra, Emoji, sans-serif';
 
 const W = 1000;
 const H = 420;

@@ -18,7 +18,7 @@ const store = require('../store');
 const { isTrusted } = require('../trust');
 const { isStaff } = require('./tickets');
 
-const FONT = 'Poppins, DejaVu, Emoji, sans-serif';
+const FONT = 'Poppins, DejaVu, FancyMath, CJK, Extra, Emoji, sans-serif';
 const GOLD = 0xf5c542;
 const MAX_MS = 30 * 24 * 60 * 60_000;
 
