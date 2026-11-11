@@ -78,11 +78,13 @@ Bot anti-raid / anti-nuke / anti-spam hecho a medida para un solo server (`15666
 - `!pleave` → se sale (alguien de ese vc o el staff).
 
 **Vc temporales propios** (reemplazo de TempVoice)
-- Entras a `➕┆𝗩𝗰 𝗖𝗿𝗲𝗮𝘁𝗼𝗿` → se crea tu vc y te mueve. En su chat: **Vc Own: @tú** + botones (nombre/status, límite, cerrar, ocultar, sacar, pasar el vc, borrar).
-- Si te sales, el vc sigue y sigues siendo el dueño. Se borra solo tras 12 h vacío (`TEMPVC_EMPTY_HOURS`) o cuando el dueño le da a Borrar.
+- Entras a `➕┆𝗩𝗰 𝗖𝗿𝗲𝗮𝘁𝗼𝗿` → se crea tu vc y te mueve. En su chat: embed **Vc Own: @tú** (sin ping) con botones: nombre/status, límite, ocultar, sacar, borrar.
+- Se borra solo cuando queda totalmente vacío (si queda un bot o cualquier persona, no se borra).
+- `!vcpanel` → vuelve a mandar el panel (solo el owner de un vc abierto).
 
-**Guardianes de vc**
-- Bots extra (`GUARD_TOKEN_1`, `GUARD_TOKEN_2`) que se quedan fijos en su vc (`GUARD_CHANNEL_1/2`) para que nunca quede vacío. Si los sacan o se caen, vuelven solos. Corren en el mismo servicio de Render.
+**Guardianes de vc** (`GUARD_TOKEN_1` … `GUARD_TOKEN_5`)
+- `!gvc` estando en vc → entra un guardián libre al azar y dice "Protegiendo #canal 😊". Si no hay libres: "No hay nadie disponible f mi bro".
+- `!gvc off` → el guardián de tu vc se va. Si borran el vc, el guardián queda libre. Tras un reinicio vuelven a sus vc.
 
 **Contador en vivo**
 - En el canal de stats el bot mantiene un mensaje (sin embed) con: @Boy 0km -> N, @Girl 0km -> N, Miembros Total y Online. Se edita cada 5 s si algo cambió.

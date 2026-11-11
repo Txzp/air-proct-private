@@ -64,6 +64,7 @@ vctime.init(client);
 giveaway.init(client);
 voice.init(client);
 tempvc.init(client);
+guards.init(client);
 
 client.once(Events.ClientReady, async (c) => {
   console.log(`[bot] Conectado como ${c.user.tag}`);
@@ -96,6 +97,7 @@ async function initGuild(c) {
   await vcboard.start(guild, vctime.sessions).catch((e) => console.error('[vcboard]', e.message));
   await voice.start(guild).catch((e) => console.error('[voice]', e.message));
   await tempvc.start(guild).catch((e) => console.error('[tempvc]', e.message));
+  guards.restore().catch((e) => console.error('[guard]', e.message));
   await serverlogs.start(guild).catch((e) => console.error('[serverlogs]', e.message));
 
   ready = true;

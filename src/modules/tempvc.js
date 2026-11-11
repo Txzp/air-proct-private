@@ -46,29 +46,19 @@ const creatorId = () => db.get('tempVcCreator', {}).channelId;
 
 /* ---------- Panel ---------- */
 function panel(ownerId, ch) {
-  const locked = ch?.permissionOverwrites.cache.get(ch.guild.id)?.deny.has(P.Connect);
   const hidden = ch?.permissionOverwrites.cache.get(ch.guild.id)?.deny.has(P.ViewChannel);
   const embed = new EmbedBuilder()
     .setColor(0x5865f2)
-    .setDescription(
-      `**Vc Own:** <@${ownerId}>\n\n` +
-        `✏️ Nombre / status • 👥 Límite • ${locked ? '🔓 Abrir' : '🔒 Cerrar'} • ${hidden ? '👁️ Mostrar' : '🙈 Ocultar'}\n` +
-        `👢 Sacar a alguien • 👑 Pasar el vc • 🗑️ Borrar\n\n-# Solo el dueño (o el staff) puede usar estos botones`
-    );
-  const rows = [
-    new ActionRowBuilder().addComponents(
-      new ButtonBuilder().setCustomId('tv_name').setEmoji('✏️').setLabel('Nombre / status').setStyle(ButtonStyle.Primary),
-      new ButtonBuilder().setCustomId('tv_limit').setEmoji('👥').setLabel('Límite').setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder().setCustomId('tv_lock').setEmoji(locked ? '🔓' : '🔒').setLabel(locked ? 'Abrir' : 'Cerrar').setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder().setCustomId('tv_hide').setEmoji(hidden ? '👁️' : '🙈').setLabel(hidden ? 'Mostrar' : 'Ocultar').setStyle(ButtonStyle.Secondary)
-    ),
-    new ActionRowBuilder().addComponents(
-      new ButtonBuilder().setCustomId('tv_kick').setEmoji('👢').setLabel('Sacar').setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder().setCustomId('tv_transfer').setEmoji('👑').setLabel('Pasar el vc').setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder().setCustomId('tv_delete').setEmoji('🗑️').setLabel('Borrar').setStyle(ButtonStyle.Danger)
-    ),
-  ];
-  return { content: `<@${ownerId}>`, embeds: [embed], components: rows, allowedMentions: { users: [ownerId] } };
+    .setDescription(`**Vc Own:** <@${ownerId}>\n\n-# Usa \`!vcpanel\` para volver a sacar este panel (solo el owner)\n-# Usa \`!gvc\` para un bot afk`);
+  const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder().setCustomId('tv_name').setEmoji('✏️').setLabel('Nombre / status').setStyle(ButtonStyle.Primary),
+    new ButtonBuilder().setCustomId('tv_limit').setEmoji('👥').setLabel('Límite').setStyle(ButtonStyle.Secondary),
+    new ButtonBuilder().setCustomId('tv_hide').setEmoji(hidden ? '👁️' : '🙈').setLabel(hidden ? 'Mostrar' : 'Ocultar').setStyle(ButtonStyle.Secondary),
+    new ButtonBuilder().setCustomId('tv_kick').setEmoji('👢').setLabel('Sacar').setStyle(ButtonStyle.Secondary),
+    new ButtonBuilder().setCustomId('tv_delete').setEmoji('🗑️').setLabel('Borrar').setStyle(ButtonStyle.Danger)
+  );
+  // sin content = sin ping
+  return { embeds: [embed], components: [row], allowedMentions: { parse: [] } };
 }
 
 async function refreshPanel(ch) {
@@ -76,7 +66,7 @@ async function refreshPanel(ch) {
   if (!info) return;
   const msg = info.panelId ? await ch.messages.fetch(info.panelId).catch(() => null) : null;
   const payload = panel(info.ownerId, ch);
-  if (msg) await msg.edit({ ...payload, content: msg.content }).catch(() => {});
+  if (msg) await msg.edit(payload).catch(() => {});
   else {
     const m = await ch.send(payload).catch(() => null);
     if (m) {
@@ -123,31 +113,23 @@ async function createFor(member) {
 }
 
 /* ---------- Limpieza de vc vacíos ---------- */
+async function deleteIfEmpty(ch) {
+  if (!ch || !vcs()[ch.id]) return;
+  if (ch.members.size > 0) return; // hay alguien (persona o bot) → se queda
+  await ch.delete('AirProtect: vc vacío').catch(() => {});
+  delete vcs()[ch.id];
+  db.markDirty();
+}
+
 async function sweep(guild) {
-  const now = Date.now();
-  for (const [id, v] of Object.entries(vcs())) {
+  for (const id of Object.keys(vcs())) {
     const ch = guild.channels.cache.get(id);
     if (!ch) {
       delete vcs()[id];
       db.markDirty();
       continue;
     }
-    const humans = ch.members.filter((m) => !m.user.bot).size;
-    if (humans) {
-      if (v.emptySince) {
-        v.emptySince = null;
-        db.markDirty();
-      }
-      continue;
-    }
-    if (!v.emptySince) {
-      v.emptySince = now;
-      db.markDirty();
-    } else if (now - v.emptySince > T.emptyDeleteMs) {
-      await ch.delete('AirProtect: vc vacío mucho tiempo').catch(() => {});
-      delete vcs()[id];
-      db.markDirty();
-    }
+    await deleteIfEmpty(ch);
   }
 }
 
@@ -207,12 +189,6 @@ async function onInteraction(i) {
       await ch.setUserLimit(n);
       return i.reply({ content: n ? `👥 Límite: **${n}**` : '👥 Sin límite', flags: MessageFlags.Ephemeral });
     }
-    case 'tv_lock': {
-      const locked = ch.permissionOverwrites.cache.get(everyone)?.deny.has(P.Connect);
-      await ch.permissionOverwrites.edit(everyone, { Connect: locked ? null : false });
-      await refreshPanel(ch);
-      return i.reply({ content: locked ? '🔓 Vc abierto' : '🔒 Vc cerrado: solo entran los que ya están o a quien muevas', flags: MessageFlags.Ephemeral });
-    }
     case 'tv_hide': {
       const hidden = ch.permissionOverwrites.cache.get(everyone)?.deny.has(P.ViewChannel);
       await ch.permissionOverwrites.edit(everyone, { ViewChannel: hidden ? null : false });
@@ -220,9 +196,8 @@ async function onInteraction(i) {
       return i.reply({ content: hidden ? '👁️ Vc visible' : '🙈 Vc oculto', flags: MessageFlags.Ephemeral });
     }
     case 'tv_kick':
-    case 'tv_transfer':
       return i.reply({
-        content: id === 'tv_kick' ? '👢 ¿A quién saco del vc?' : '👑 ¿A quién le pasas el vc?',
+        content: '👢 ¿A quién saco del vc?',
         components: [new ActionRowBuilder().addComponents(new UserSelectMenuBuilder().setCustomId(`${id}_sel`).setPlaceholder('Elige a alguien').setMaxValues(1))],
         flags: MessageFlags.Ephemeral,
       });
@@ -233,16 +208,6 @@ async function onInteraction(i) {
       if (target.voice.channelId === ch.id) await target.voice.disconnect('Sacado por el dueño del vc').catch(() => {});
       return i.update({ content: `👢 ${target} fuera y ya no puede volver a entrar.`, components: [] });
     }
-    case 'tv_transfer_sel': {
-      const target = await i.guild.members.fetch(i.values[0]).catch(() => null);
-      if (!target || target.user.bot) return i.update({ content: '❌ Elige a una persona.', components: [] });
-      await ch.permissionOverwrites.edit(target.id, { ViewChannel: true, Connect: true, Speak: true });
-      info.ownerId = target.id;
-      db.markDirty();
-      await refreshPanel(ch);
-      await ch.send({ content: `👑 Ahora el vc es de ${target}`, allowedMentions: { users: [target.id] } }).catch(() => {});
-      return i.update({ content: `👑 Le pasaste el vc a ${target}.`, components: [] });
-    }
     case 'tv_delete':
       await i.reply({ content: '🗑️ Borrando el vc...', flags: MessageFlags.Ephemeral });
       delete vcs()[ch.id];
@@ -252,11 +217,34 @@ async function onInteraction(i) {
 }
 
 /* ---------- Init ---------- */
+async function onMessage(message) {
+  if (!message.guild || message.guild.id !== cfg.guildId || message.author.bot) return;
+  if ((message.content || '').trim().toLowerCase() !== '!vcpanel') return;
+  const vc = message.member?.voice.channel;
+  const info = vc && vcs()[vc.id];
+  if (!vc || !info) return message.reply({ content: 'ni estas en vc pndj', allowedMentions: { repliedUser: false } }).catch(() => {});
+  if (info.ownerId !== message.author.id && !isTrusted(message.guild, message.author.id)) {
+    return message.reply({ content: 'ese vc ni es tuyo pndj 😭', allowedMentions: { repliedUser: false } }).catch(() => {});
+  }
+  const m = await vc.send(panel(info.ownerId, vc)).catch(() => null);
+  if (m) {
+    info.panelId = m.id;
+    db.markDirty();
+  }
+  if (message.channelId !== vc.id) message.react('✅').catch(() => {});
+}
+
 function init(client) {
   client.on(Events.VoiceStateUpdate, (o, n) => {
-    if (n.guild.id !== cfg.guildId || n.member?.user.bot) return;
+    if (n.guild.id !== cfg.guildId) return;
+    // alguien (persona o bot) salió de un vc temporal → si quedó vacío, se borra
+    if (o.channelId && o.channelId !== n.channelId && vcs()[o.channelId]) {
+      setTimeout(() => deleteIfEmpty(o.guild.channels.cache.get(o.channelId)).catch(() => {}), 3000);
+    }
+    if (n.member?.user.bot) return;
     if (n.channelId && n.channelId === creatorId() && o.channelId !== n.channelId) createFor(n.member).catch((e) => console.error('[tempvc]', e));
   });
+  client.on(Events.MessageCreate, (m) => onMessage(m).catch((e) => console.error('[tempvc]', e)));
   client.on(Events.ChannelDelete, (ch) => {
     if (vcs()[ch.id]) {
       delete vcs()[ch.id];
@@ -278,7 +266,8 @@ async function start(guild) {
   const creator = await ensureCreator(guild);
   // quien ya esté esperando en el creador
   for (const m of creator.members.values()) if (!m.user.bot) await createFor(m).catch(() => {});
+  await sweep(guild).catch(() => {});
   setInterval(() => sweep(guild).catch((e) => console.error('[tempvc] sweep', e.message)), 60_000).unref();
 }
 
-module.exports = { init, start };
+module.exports = { init, start, isTempVc: (id) => Boolean(vcs()[id]) };

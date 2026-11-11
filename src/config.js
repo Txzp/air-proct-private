@@ -115,14 +115,10 @@ module.exports = {
   tempVc: {
     categoryId: process.env.TEMPVC_CATEGORY_ID || '1566693067317059645',
     creatorName: '➕┆𝗩𝗰 𝗖𝗿𝗲𝗮𝘁𝗼𝗿',
-    emptyDeleteMs: num(process.env.TEMPVC_EMPTY_HOURS, 12) * 60 * 60_000, // se borra tras 12 h vacío (el dueño puede borrarlo antes)
   },
 
-  // Bots guardianes: cada uno se queda fijo en un vc para que nunca se quede vacío
-  guards: [
-    { token: process.env.GUARD_TOKEN_1 || '', channelId: process.env.GUARD_CHANNEL_1 || '1569978823959777310' },
-    { token: process.env.GUARD_TOKEN_2 || '', channelId: process.env.GUARD_CHANNEL_2 || '1569979030533439529' },
-  ],
+  // Bots guardianes (hasta 5): se piden con !gvc y entran a tu vc. GUARD_CHANNEL_n opcional = fijo en ese vc
+  guards: [1, 2, 3, 4, 5].map((n) => ({ token: process.env[`GUARD_TOKEN_${n}`] || '', channelId: process.env[`GUARD_CHANNEL_${n}`] || '' })),
 
   vcBoard: {
     categoryId: process.env.VC_BOARD_CATEGORY_ID || '1566688764498026617',
