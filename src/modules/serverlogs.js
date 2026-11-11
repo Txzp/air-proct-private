@@ -63,7 +63,7 @@ function permDiff(oldV, newV) {
 
 const hex = (v) => (v ? `#${Number(v).toString(16).padStart(6, '0')}` : 'ninguno');
 const yn = (v) => (v ? 'sí' : 'no');
-const SKIP_KEYS = new Set(['position', 'id', 'type', 'flags', 'permissions_new', 'available', 'guild_id', 'inviter_id', 'uses', 'channel_id', 'application_id', 'default_reaction_emoji', 'available_tags', 'theme_colors', 'colors']);
+const SKIP_KEYS = new Set(['permission_overwrites', 'position', 'id', 'type', 'flags', 'permissions_new', 'available', 'guild_id', 'inviter_id', 'uses', 'channel_id', 'application_id', 'default_reaction_emoji', 'available_tags', 'theme_colors', 'colors']);
 
 function renderChange(c, entry) {
   const { key, old: o, new: n } = c;
@@ -223,6 +223,20 @@ async function onAudit(entry, guild) {
     lines.push(`**Cantidad:** ${entry.extra?.count ?? '?'}`);
   } else if (entry.action === A.MemberPrune) {
     lines.push(`**Expulsados:** ${entry.extra?.removed ?? '?'} • inactivos ${entry.extra?.days ?? '?'} días`);
+  } else if (/creado|creada|eliminado|eliminada|añadido/.test(meta[1])) {
+    // crear/borrar: el objetivo ya muestra el nombre; solo datos útiles (sin "→ —")
+    for (const c of entry.changes) {
+      const v = c.new ?? c.old;
+      if (v === undefined || v === null || v === '' || SKIP_KEYS.has(c.key) || c.key === 'name') continue;
+      if (c.key === 'type' && entry.targetType === 'Channel') continue;
+      if (c.key === 'topic') lines.push(`**Tema:** ${cut(v, 200)}`);
+      else if (c.key === 'permissions' && v !== '0') lines.push(`**Permisos:** ${new PermissionsBitField(BigInt(v)).toArray().join(', ') || 'ninguno'}`);
+      else if (c.key === 'color' && v) lines.push(`**Color:** ${hex(v)}`);
+      else if (c.key === 'user_limit' && v) lines.push(`**Límite de usuarios:** ${v}`);
+      else if (c.key === 'code') lines.push(`**Código:** \`${v}\``);
+      else if (c.key === 'max_uses') lines.push(`**Usos máximos:** ${v || '∞'}`);
+      else if (c.key === 'max_age') lines.push(`**Expira en:** ${v ? `${v / 3600} h` : 'nunca'}`);
+    }
   } else {
     for (const c of entry.changes) {
       const r = renderChange(c, entry);
@@ -286,6 +300,9 @@ async function findUsedInvite(guild) {
   }
   return used;
 }
+
+// Nombres de canales de voz (los temporales se borran y quedan como "unknown")
+const voiceNames = new Map();
 
 /* ---------- Eventos ---------- */
 function init(c) {
@@ -399,9 +416,11 @@ function init(c) {
   client.on(Events.VoiceStateUpdate, (o, n) => {
     if (n.guild.id !== cfg.guildId) return;
     const who = `<@${n.id}> (\`${n.member?.user.tag || n.id}\`)`;
-    if (!o.channelId && n.channelId) send(E(C.green, '🔊 Entró a voz').setDescription(`${who}\n**Canal:** <#${n.channelId}>`).setFooter({ text: `ID: ${n.id}` }));
-    else if (o.channelId && !n.channelId) send(E(C.red, '🔇 Salió de voz').setDescription(`${who}\n**Canal:** <#${o.channelId}>`).setFooter({ text: `ID: ${n.id}` }));
-    else if (o.channelId !== n.channelId) send(E(C.blue, '🔀 Cambió de canal de voz').setDescription(`${who}\n<#${o.channelId}> → <#${n.channelId}>`).setFooter({ text: `ID: ${n.id}` }));
+    const vc = (state) => (state.channel ? `<#${state.channelId}> (\`${state.channel.name}\`)` : `\`${voiceNames.get(state.channelId) || state.channelId}\``);
+    if (n.channel) voiceNames.set(n.channelId, n.channel.name);
+    if (!o.channelId && n.channelId) send(E(C.green, '🔊 Entró a voz').setDescription(`${who}\n**Canal:** ${vc(n)}`).setFooter({ text: `ID: ${n.id}` }));
+    else if (o.channelId && !n.channelId) send(E(C.red, '🔇 Salió de voz').setDescription(`${who}\n**Canal:** ${vc(o)}${o.channel ? '' : ' *(ya borrado)*'}`).setFooter({ text: `ID: ${n.id}` }));
+    else if (o.channelId !== n.channelId) send(E(C.blue, '🔀 Cambió de canal de voz').setDescription(`${who}\n${vc(o)} → ${vc(n)}`).setFooter({ text: `ID: ${n.id}` }));
     else if (!o.streaming && n.streaming) send(E(C.purple, '📺 Empezó a transmitir').setDescription(`${who}\n**Canal:** <#${n.channelId}>`).setFooter({ text: `ID: ${n.id}` }));
   });
 }
