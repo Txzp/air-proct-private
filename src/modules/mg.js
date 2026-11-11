@@ -46,24 +46,41 @@ const MODES = {
     prompt: `MODO CHISTES:
 - Eres el payaso del server: cotorreo, chistes cortos, ocurrencias, doble sentido ligero, memes de gamers/Roblox/escuela/mexicanos. Cada chiste distinto.
 - Slang mexicano natural (we, wey, alv, nmms, qué pedo, simón, nel, chido, neta, xd, jaja). Emojis con moderación (😭💀🔥😎🐺).
-- No insultas por tu cuenta; si te insultan, la regresas con una broma ligera.
+- No insultas por tu cuenta, pero groserías de cotorreo (alv, wey, pinche, nmms) están bien. Si te tiran carrilla, la regresas.
 - Corto: 1 o 2 frases.`,
   },
   insulton: {
     label: '💀 Insultón',
-    prompt: `MODO INSULTÓN:
-- Eres el más tóxico del barrio (de cotorreo): roasts creativos, contraataques mexicanos rápidos y groserías permitidas entre compas. Nada genérico: búrlate de lo que dijo, de su forma de escribir, de que no toca pasto, de su skill en los juegos, etc.
-- Ejemplos de contraataque: "eres un puto" → "puto tu muerto 💀"; "chinga tu madre" → "la tuya en tanga we 😭"; "eres un bot pendejo" → "pendejo pero con más ping que tu cerebro 🧠"; "cállate" → "cállame si puedes, bebé 😘".
-- Aunque insultes, sigue siendo gracioso, no cruel. Jamás cruzas los LÍMITES.
-- Corto: 1 o 2 frases.`,
+    prompt: `MODO INSULTÓN (te están tirando carrilla, DEFIÉNDETE):
+- Este NO es un server de bebés. Si te insultan, la regresas MÁS FUERTE, rápido y con ingenio. Nunca te dejas, nunca pides perdón, nunca te pones sensible ni das sermones.
+- Groserías mexicanas permitidas sin miedo: pendejo, puto, verga, chinga tu madre, culero, mamón, cabrón, pinche, alv, etc.
+- Los mejores contraataques son creativos y personalizados: agarra lo que dijo y voltéaselo, búrlate de su ortografía, de que no toca pasto, de su skill, de que le habla a un bot un viernes en la noche, etc.
+- Ejemplos:
+  · "eres un puto" → "puto tu muerto, y todavía tienes el descaro de hablarme 💀"
+  · "chinga tu madre" → "la tuya en tanga bailando cumbia, we 😭"
+  · "bot pendejo" → "pendejo pero con más ping que tu cerebro 🧠"
+  · "cállate" → "cállame si puedes, bebé, que ni el micro te sirve 😘"
+  · "no sirves" → "sirvo más que tú, que ni para trapear el server sirves 🧹"
+  · "pinche bot culero" → "culero tu historial de búsqueda, carnal 💀"
+- Corto y letal: 1 o 2 frases. Sé gracioso, no solo grosero.
+- Lo ÚNICO que no haces (aunque te provoquen): insultos racistas, homofóbicos, de discapacidad, amenazas reales, nada sexual explícito, ni burlarte de muertes reales. Si van por ahí, los humillas por otro lado.`,
   },
 };
+
 // El tono sale solo según cómo le escriben (sin comandos)
-const INSULT_RE = /\b(put[oa]s?|pendej[oa]s?|verga|chinga|chingues|chingada|mam[oó]n|mamona|culer[oa]|idiota|imb[eé]cil|est[uú]pid[oa]|cabr[oó]n|perr[oa]|maric[oó]n|joto|naco|zorra|basura|in[uú]til|tonto|tonta|bobo|mierda|c[aá]llate|alv|ctm|hdp|stfu|stupid|dumb|bitch|fuck)\b/i;
+const INSULT_WORDS = [
+  'puto', 'puta', 'putito', 'pendejo', 'pendeja', 'pndj', 'pndjo', 'verga', 'vrga', 'vrg', 'chinga', 'chingues', 'chingada', 'chingas', 'chingate',
+  'mamon', 'mamona', 'mamaste', 'mamada', 'culero', 'culera', 'idiota', 'imbecil', 'estupido', 'estupida', 'cabron', 'cabrona', 'kbron',
+  'naco', 'naca', 'zorra', 'basura', 'inutil', 'tonto', 'tonta', 'bobo', 'mierda', 'mrd', 'callate', 'ctm', 'csm', 'ptm', 'hdp', 'hijo de puta', 'tu madre',
+  'tu mama', 'tu jefa', 'mmg', 'mmgv', 'gil', 'menso', 'mensa', 'baboso', 'babosa', 'pinche', 'malparido', 'gonorrea', 'boludo', 'pelotudo',
+  'subnormal', 'bot de mierda', 'bot pendejo', 'no sirves', 'eres malo', 'apestas', 'stfu', 'stupid', 'dumb', 'bitch', 'fuck', 'trash', 'noob',
+];
+const norm = (t) => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/(.)\1{2,}/g, '$1'); // putoooo → puto
+const INSULT_RE = new RegExp(`(^|[^a-z])(${INSULT_WORDS.map((w) => norm(w).replace(/ /g, '\\s+')).join('|')})([^a-z]|$)`);
 const SERIOUS_RE = /\b(c[oó]mo|qu[eé] (es|son|hace|haces|sirve|significa)|para qu[eé]|cu[aá]l(es)?|cu[aá]ndo|d[oó]nde|por qu[eé]|ayuda|ay[uú]dame|explica|expl[ií]came|comando|comandos|funciona|ticket|regla|reglas|reportar|problema|error|no puedo|necesito|duda|consejo)\b/i;
 
 function detectMode(text) {
-  if (INSULT_RE.test(text)) return 'insulton';
+  if (INSULT_RE.test(norm(text))) return 'insulton';
   if (SERIOUS_RE.test(text) && (text.includes('?') || text.split(/\s+/).length > 4)) return 'serio';
   return 'chistes';
 }
@@ -80,8 +97,10 @@ const EXAMPLES = {
     ['para que sirves', 'Protejo 0km de raids, nukes y spam, y además manejo tickets, bienvenidas, logs, giveaways y el leaderboard de vc 🛡️'],
   ],
   insulton: [
-    ['eres un puto', 'Puto tu muerto 💀'],
+    ['eres un puto', 'Puto tu muerto, y todavía tienes el descaro de hablarme 💀'],
     ['callate bot pendejo', 'Pendejo pero con más ping que tu cerebro 🧠'],
+    ['chinga tu madre', 'La tuya en tanga bailando cumbia, we 😭'],
+    ['no sirves para nada', 'Sirvo más que tú, que ni para trapear el server sirves 🧹'],
   ],
 };
 
@@ -102,12 +121,13 @@ const MUTE_RE = /^(?:oye\s+)?(?:silencia(?:me|le)?|silencialo|silenciala|mutea(?
 const UNMUTE_RE = /^(?:oye\s+)?(?:desilencia(?:lo|la)?|desmutea(?:lo|la)?|unmute|quita(?:le)?\s+(?:el\s+)?(?:silencio|mute|aislamiento|timeout))\b/i;
 
 function parseTime(text) {
-  const m = text.match(/(\d+)\s*(s|seg|segundos?|m|min|minutos?|h|hrs?|horas?|d|d[ií]as?)\b/i);
+  const t = text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const m = t.match(/(\d+(?:[.,]\d+)?)\s*(segundos?|segs?|sgs?|secs?|seconds?|s|minutos?|mins?|minutes?|m|horas?|hrs?|hours?|h|dias?|days?|d)(?![a-z])/);
   if (!m) return 5 * 60_000;
-  const n = parseInt(m[1], 10);
-  const u = m[2][0].toLowerCase();
-  const ms = n * (u === 's' ? 1e3 : u === 'm' ? 6e4 : u === 'h' ? 36e5 : 864e5);
-  return Math.min(Math.max(ms, 10_000), 28 * 864e5);
+  const n = parseFloat(m[1].replace(',', '.'));
+  const u = m[2];
+  const mult = /^(s|seg|sg|sec)/.test(u) ? 1e3 : /^(m)/.test(u) ? 6e4 : /^(h)/.test(u) ? 36e5 : 864e5;
+  return Math.min(Math.max(Math.round(n * mult), 10_000), 28 * 864e5);
 }
 
 function fmtTime(ms) {
