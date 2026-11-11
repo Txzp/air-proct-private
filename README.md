@@ -44,7 +44,7 @@ Bot anti-raid / anti-nuke / anti-spam hecho a medida para un solo server (`15666
 - `/warns @user` para ver su historial, `/clearwarns @user` para borrarlo. Se reconstruyen desde los logs si Render reinicia.
 
 **Charla `!m`** (también `!mg`)
-- `!m como andas we` → el bot responde (reply) con personalidad de compa: cotorreo, chistes y contraataques ("eres un puto" → "puto tu muerto 💀"). Su creador: k940 🐺. Usa modelos gratis de OpenRouter (los detecta solo y cambia de modelo si uno falla). Recuerda la plática reciente del canal. Cooldown de 5 s por usuario.
+- `!m como andas we` → el bot responde (reply) con personalidad de compa: cotorreo, chistes y contraataques ("eres un puto" → "puto tu muerto 💀"). Su creador: k940 🐺. Identidad fija (sabe quién es, para qué sirve y sus comandos) y 3 modos por usuario: `!m modo serio`, `!m modo chistes` (default), `!m modo insulton`. Usa modelos gratis de OpenRouter (los detecta solo y cambia de modelo si uno falla). Recuerda la plática reciente del canal. Cooldown de 5 s por usuario.
 - Variables: `OPENROUTER_API_KEY` (obligatoria), `MG_CHANNEL_ID` (opcional), `MG_MODEL` (opcional).
 
 **Logs del servidor** (canal privado del staff)
