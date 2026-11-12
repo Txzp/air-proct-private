@@ -44,11 +44,27 @@ async function onJoin(member) {
     return;
   }
 
+  if (isTrusted(guild, member.id)) return;
+
   // ---- Humanos: detección de raid por oleada de entradas ----
   const now = Date.now();
   state.joins = state.joins.filter((t) => now - t < R.windowMs);
   state.joins.push(now);
   if (!raidActive() && state.joins.length >= R.joins) setRaid(true, `${state.joins.length} entradas en ${R.windowMs / 1000}s`);
+
+  // ---- Durante la alerta/raid: patea a CUALQUIERA que entre + DM ----
+  if (raidActive()) {
+    const invite = R.rejoinInvite;
+    const dm =
+      '```ansi\n\u001b[2;31mDiscord Alert:\u001b[0m Desactiva cualquier cosa que esté causando la alerta en tu cuenta.\n```\n' +
+      `Cuando estés listo, vuelve a unirte 👉 ${invite}`;
+    await member.send(dm).catch(() => {});
+    const ok = await member.kick('AirProtect: entró durante una alerta de raid').then(() => true).catch(() => false);
+    log('danger', 'Expulsado durante alerta', `${member} (\`${member.user.tag}\`) entró durante la alerta de raid y ${ok ? 'fue expulsado' : 'NO se pudo expulsar'}.`, [
+      { name: 'Edad de la cuenta', value: `${((now - member.user.createdTimestamp) / DAY).toFixed(1)} días`, inline: true },
+    ]);
+    return;
+  }
 
   const ageDays = (now - member.user.createdTimestamp) / DAY;
   const minAge = raidActive() ? Math.max(R.raidMinAccountAgeDays, R.minAccountAgeDays) : R.minAccountAgeDays;

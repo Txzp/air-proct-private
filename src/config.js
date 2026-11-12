@@ -148,5 +148,6 @@ module.exports = {
     raidModeMs: num(process.env.RAID_MODE_MS, 10 * 60_000), // modo raid dura 10 min
     raidMinAccountAgeDays: num(process.env.RAID_MIN_ACCOUNT_AGE_DAYS, 7), // en modo raid se expulsan cuentas nuevas
     minAccountAgeDays: num(process.env.MIN_ACCOUNT_AGE_DAYS, 0), // siempre (0 = desactivado)
+    rejoinInvite: process.env.REJOIN_INVITE || 'https://discord.gg/vrK8qjRwNy', // invite del DM al expulsar durante alerta
   },
 };
