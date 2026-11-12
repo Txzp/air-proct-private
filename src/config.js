@@ -36,7 +36,7 @@ module.exports = {
       ],
 
   // Dueños del bot (pueden manejar la whitelist). El dueño del server siempre cuenta.
-  ownerIds: list(process.env.OWNER_IDS),
+  ownerIds: list(process.env.OWNER_IDS).length ? list(process.env.OWNER_IDS) : ['303188562168250369'], // zk (k940) — dueño del bot
   // Usuarios / bots de confianza iniciales (también se pueden añadir con /whitelist)
   whitelist: list(process.env.WHITELIST_IDS),
 
