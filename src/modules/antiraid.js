@@ -1,6 +1,6 @@
 const { Events, AuditLogEvent } = require('discord.js');
 const cfg = require('../config');
-const { isTrusted } = require('../trust');
+const { isTrusted, canAddBots } = require('../trust');
 const { log } = require('../logger');
 
 const R = cfg.antiRaid;
@@ -33,12 +33,12 @@ async function onJoin(member) {
       adder = logs?.entries.find((e) => e.targetId === member.id)?.executorId || null;
       if (!adder) await sleep(400);
     }
-    if (adder && isTrusted(guild, adder)) {
-      log('info', 'Bot añadido', `${member} fue añadido por <@${adder}> (de confianza).`);
+    if (adder && canAddBots(guild, adder)) {
+      log('info', 'Bot añadido', `${member} fue añadido por <@${adder}> (puede autorizar bots).`);
       return;
     }
     await member.kick('AirProtect: bot no autorizado').catch(() => {});
-    log('danger', 'Bot no autorizado expulsado', `${member} (\`${member.id}\`) entró y fue expulsado al instante.`, [
+    log('danger', 'Bot no autorizado expulsado', `${member} (\`${member.id}\`) entró y fue expulsado. Solo Owner/own pueden meter bots.`, [
       { name: 'Añadido por', value: adder ? `<@${adder}>` : 'desconocido' },
     ]);
     return;

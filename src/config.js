@@ -21,9 +21,18 @@ module.exports = {
   trustedRoles: list(process.env.TRUSTED_ROLE_IDS).length
     ? list(process.env.TRUSTED_ROLE_IDS)
     : [
+        '1568855957142900867', // Owner (rol del dueño real)
         '1566683311164624996', // own (admins)
         '1568104847390285975', // Manager
         '1568486463975333959', // Bots (bots ya aprobados)
+      ],
+
+  // SOLO estos roles pueden autorizar/meter bots. Los demás (Manager, etc.) no: el bot que metan se expulsa.
+  botAuthRoles: list(process.env.BOT_AUTH_ROLE_IDS).length
+    ? list(process.env.BOT_AUTH_ROLE_IDS)
+    : [
+        '1568855957142900867', // Owner
+        '1566683311164624996', // own
       ],
 
   // Dueños del bot (pueden manejar la whitelist). El dueño del server siempre cuenta.

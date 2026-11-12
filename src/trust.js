@@ -21,6 +21,14 @@ function isTrusted(guild, id) {
   );
 }
 
+// ¿Puede meter/autorizar bots? Solo owner del server, whitelist y roles botAuthRoles (Owner/own).
+function canAddBots(guild, id) {
+  if (!id) return false;
+  if (isOwner(guild, id) || cfg.whitelist.includes(id) || store.data.whitelist.includes(id)) return true;
+  const m = guild.members.cache.get(id);
+  return Boolean(m && cfg.botAuthRoles.some((r) => m.roles.cache.has(r)));
+}
+
 // Id actual de un rol protegido (por si fue recreado)
 function roleId(id) {
   let cur = id;
@@ -36,4 +44,4 @@ function protectedRoleIds() {
   return Object.values(cfg.protectedRoles).map(roleId);
 }
 
-module.exports = { isOwner, isTrusted, roleId, protectedRoleIds };
+module.exports = { isOwner, isTrusted, canAddBots, roleId, protectedRoleIds };
