@@ -94,8 +94,9 @@ async function createFor(member) {
       type: ChannelType.GuildVoice,
       parent: T.categoryId,
       bitrate: creator?.bitrate,
+      // Público: todos pueden entrar, hablar y escribir. Solo queda oculto/cerrado si el dueño lo hace.
       permissionOverwrites: [
-        ...(guild.channels.cache.get(T.categoryId)?.permissionOverwrites.cache.map((o) => ({ id: o.id, type: o.type, allow: o.allow.bitfield, deny: o.deny.bitfield })) || []),
+        { id: guild.id, allow: [P.ViewChannel, P.Connect, P.Speak, P.Stream, P.UseVAD, P.SendMessages, P.ReadMessageHistory] },
         { id: member.id, allow: [P.ViewChannel, P.Connect, P.Speak, P.Stream, P.UseVAD, P.SendMessages, P.ReadMessageHistory] },
         { id: guild.client.user.id, allow: [P.ViewChannel, P.Connect, P.ManageChannels, P.MoveMembers, P.SendMessages, P.EmbedLinks] },
       ],
