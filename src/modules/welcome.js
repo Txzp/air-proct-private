@@ -213,4 +213,4 @@ function init(client) {
   client.on(Events.GuildMemberRemove, (m) => onLeave(m).catch((e) => console.error('[goodbye]', e)));
 }
 
-module.exports = { init, renderCard };
+module.exports = { init, renderCard, FONT_STACK };

@@ -49,9 +49,18 @@ function slug(name) {
 function panelPayload() {
   const embed = new EmbedBuilder()
     .setColor(0x5865f2)
-    .setTitle('🎫 Soporte — Abrir ticket')
+    .setAuthor({ name: `${cfg.welcome.serverName} • Soporte` })
+    .setTitle('🎫 Centro de ayuda')
     .setDescription(
-      '¿Necesitas ayuda, reportar a alguien o hablar con el staff?\nDale al botón de abajo y se abrirá un canal privado solo para ti y el staff.'
+      '¿Tienes una duda, quieres reportar a alguien o hablar con el staff en privado?\n' +
+        'Abre un ticket y se creará un canal **solo para ti y el equipo**.\n\n' +
+        '**▸ ¿Para qué sirve?**\n' +
+        '┊ 🙋 Dudas y ayuda general\n' +
+        '┊ 🚨 Reportar usuarios o problemas\n' +
+        '┊ 🤝 Alianzas y propuestas\n' +
+        '┊ 🎁 Reclamar premios de giveaways\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━\n' +
+        '-# Pulsa **🎫 Abrir ticket** abajo. Un solo ticket por persona.'
     )
     .setFooter({ text: 'AirProtect • Tickets' });
   const row = new ActionRowBuilder().addComponents(
@@ -106,8 +115,17 @@ async function openTicket(i) {
 
     const embed = new EmbedBuilder()
       .setColor(0x2ecc71)
-      .setTitle(`🎫 Ticket #${number}`)
-      .setDescription(`${i.user} gracias por abrir ticket, en breve alguien del staff te atenderá.\nMientras, explica con detalle en qué te ayudamos.`)
+      .setAuthor({ name: `Ticket #${number}`, iconURL: i.user.displayAvatarURL() })
+      .setTitle('🎫 ¡Ticket abierto!')
+      .setDescription(
+        `¡Hola ${i.user}! Gracias por abrir tu ticket 💚\n` +
+          'En breve alguien del staff te atenderá. **Mientras tanto, cuéntanos con detalle en qué te ayudamos** para resolverlo más rápido.\n\n' +
+          '━━━━━━━━━━━━━━━━━━━━━\n' +
+          '🙋 **Atender** — un staff toma tu caso\n' +
+          '🔒 **Close** — cerrar el ticket (solo staff)'
+      )
+      .setThumbnail(i.user.displayAvatarURL({ size: 256 }))
+      .setFooter({ text: 'AirProtect • Tickets' })
       .setTimestamp();
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder().setCustomId('tk_claim').setLabel('Atender').setEmoji('🙋').setStyle(ButtonStyle.Success),
