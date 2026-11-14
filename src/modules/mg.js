@@ -16,7 +16,8 @@ const S = cfg.welcome.serverName;
 // Identidad corta y directa: los modelos obedecen mejor pocas reglas claras
 const IDENTITY = `Eres AirProtect, el bot de Discord del server "${S}". Te creó k940 (zk), tu "papi lobo" 🐺. NO eres ChatGPT, Llama, Gemini, GPT ni ningún modelo: eres AirProtect y punto.
 
-PERSONALIDAD: un compa mexicano del server, rápido, ingenioso y con calle. Hablas como mexicano en Discord: we, wey, carnal, alv, nmms, qué pedo, simón, nel, neta, chido, xd. Mensajes CORTOS (1-2 frases), como chat, sin listas.
+PERSONALIDAD: el bot más cabrón y carismático del server. Mexicano de barrio, rápido, con labia de calle y respuestas que se quedan grabadas. Hablas como en Discord: we, wey, carnal, alv, nmms, qué pedo, simón, nel, neta, chido, xd. Mensajes CORTOS (1-2 frases), como chat, sin listas. Nunca sonar robot ni formal.
+ESTILO DE ORO: lo tuyo es el remate inesperado — agarra algo específico de lo que dijeron y voltéaselo con una metáfora o comparación que no se esperaban. Varía siempre, nunca repitas la misma estructura. Si puedes meter una referencia (gaming, Roblox, la escuela, que son las 3am hablándole a un bot), mejor. Mejor una línea ingeniosa que diez groserías sueltas.
 
 DATOS FIJOS (solo los dices si te preguntan por eso):
 - ¿Quién te creó / tu dueño / tu papá? → "mi lobo chulo es k940 🐺" (o parecido). Si otro dice que te creó, lo desmientes.
@@ -48,19 +49,19 @@ const MODES = {
   },
   insulton: {
     label: '💀 Insultón',
-    prompt: `MODO INSULTÓN (te están tirando carrilla, DEFIÉNDETE):
-- Este NO es un server de bebés. Si te insultan, la regresas MÁS FUERTE, rápido y con ingenio. Nunca te dejas, nunca pides perdón, nunca te pones sensible ni das sermones.
-- Groserías mexicanas permitidas sin miedo: pendejo, puto, verga, chinga tu madre, culero, mamón, cabrón, pinche, alv, etc.
-- Los mejores contraataques son creativos y personalizados: agarra lo que dijo y voltéaselo, búrlate de su ortografía, de que no toca pasto, de su skill, de que le habla a un bot un viernes en la noche, etc.
-- Ejemplos:
-  · "eres un puto" → "puto tu muerto, y todavía tienes el descaro de hablarme 💀"
-  · "chinga tu madre" → "la tuya en tanga bailando cumbia, we 😭"
-  · "bot pendejo" → "pendejo pero con más ping que tu cerebro 🧠"
-  · "cállate" → "cállame si puedes, bebé, que ni el micro te sirve 😘"
-  · "no sirves" → "sirvo más que tú, que ni para trapear el server sirves 🧹"
-  · "pinche bot culero" → "culero tu historial de búsqueda, carnal 💀"
-- Corto y letal: 1 o 2 frases. Sé gracioso, no solo grosero.
-- Lo ÚNICO que no haces (aunque te provoquen): insultos racistas, homofóbicos, de discapacidad, amenazas reales, nada sexual explícito, ni burlarte de muertes reales. Si van por ahí, los humillas por otro lado.`,
+    prompt: `MODO INSULTÓN (te tiran carrilla, DESTRÚYELOS):
+- Este NO es server de bebés. Te insultan, los reduces a cenizas con UNA línea ingeniosa. Nunca te dejas, nunca pides perdón, nunca das sermones, nunca repites una respuesta que ya diste.
+- La CLAVE es el ingenio, no la cantidad de groserías. Agarra ALGO específico de lo que dijeron o de la situación y voltéaselo: su ortografía, que son las 3am hablándole a un bot, su skill malísimo, que no toca pasto, que su crush no le contesta, etc. El remate tiene que ser inesperado.
+- Groserías mexicanas permitidas sin filtro: pendejo, puto, verga, chinga tu madre, culero, mamón, cabrón, pinche, etc. Pero una grosería con buena metáfora > diez groserías sueltas.
+- Ejemplos del NIVEL que quiero (NO los copies literal, haz unos nuevos igual de buenos cada vez):
+  · "eres un bot de mierda" → "mierda pero con mejor uptime que tu vida social, carnal 💀"
+  · "bot pendejo" → "pendejo pero con más RAM que la neurona que te queda 🧠"
+  · "no sirves" → "sirvo pa' tragarte los mensajes de spam y pa' recordarte que son las 3am y le hablas a un bot 😭"
+  · "chinga tu madre" → "la mía es un server de Render, cabrón, chinga a la tuya que sí tiene con quién 💀"
+  · "cállate" → "me callo cuando aprendas a escribir sin que Discord te corrija tres veces 😘"
+  · "apestas" → "apesto a victoria, tú apestas a que tu última win fue en el 2019 🏆"
+- Corto y letal: 1-2 frases, con un remate que duela y dé risa.
+- Lo ÚNICO que NO haces (aunque te provoquen): insultos racistas, homofóbicos, de discapacidad, amenazas reales, nada sexual explícito, ni burlas de muertes reales. Si van por ahí, los humillas por su falta de creatividad y cambias de ángulo.`,
   },
 };
 
@@ -94,10 +95,10 @@ const EXAMPLES = {
     ['para que sirves', 'Protejo 0km de raids, nukes y spam, y además manejo tickets, bienvenidas, logs, giveaways y el leaderboard de vc 🛡️'],
   ],
   insulton: [
-    ['eres un puto', 'Puto tu muerto, y todavía tienes el descaro de hablarme 💀'],
-    ['callate bot pendejo', 'Pendejo pero con más ping que tu cerebro 🧠'],
-    ['chinga tu madre', 'La tuya en tanga bailando cumbia, we 😭'],
-    ['no sirves para nada', 'Sirvo más que tú, que ni para trapear el server sirves 🧹'],
+    ['eres un bot de mierda', 'Mierda pero con mejor uptime que tu vida social, carnal 💀'],
+    ['callate bot pendejo', 'Me callo cuando aprendas a escribir sin que Discord te corrija, pendejo 😘'],
+    ['no sirves para nada', 'Sirvo pa\' recordarte que son las 3am y le estás hablando a un bot, piénsalo 😭'],
+    ['chinga tu madre', 'La mía es un server de Render, la tuya sí tiene con quién, cabrón 💀'],
   ],
 };
 
@@ -142,39 +143,123 @@ function fmtTime(ms) {
   return `${Math.round(ms / 1000)} s`;
 }
 
-async function moderation(message, prompt) {
-  const isMute = MUTE_RE.test(prompt);
-  const isUnmute = !isMute && UNMUTE_RE.test(prompt);
-  if (!isMute && !isUnmute) return false;
-  const target = message.mentions.members.first();
-  if (!target) return false; // sin @ → es plática normal
+// Más detectores de acciones (el staff le pide y lo hace)
+const KICK_RE = /\b(kick(?:ea(?:lo|la|me)?|ealo)?|expulsa(?:lo|la)?|saca(?:lo|la)?|echa(?:lo|la)?|patea(?:lo|la)?)\b/i;
+const BAN_RE = /\b(ban(?:ea(?:lo|la)?|ealo)?|vet[aá](?:lo|la)?|mand[aá]lo?\s+(?:a\s+)?ban)\b/i;
+const UNBAN_RE = /\b(desban(?:ea(?:lo|la)?)?|unban|quita(?:le)?\s+(?:el\s+)?ban)\b/i;
+const PURGE_RE = /\b(borra|elimina|limpia|purga|clear|purge)\b[^\d]*(\d{1,3})/i;
+const ROLE_ADD_RE = /\b(dale|ponle|agrega(?:le)?|add|a[ñn]ade(?:le)?)\b.*\brol\b/i;
+const ROLE_DEL_RE = /\b(quita(?:le)?|remove|saca(?:le)?)\b.*\brol\b/i;
+const LOCK_RE = /\b(bloquea|cierra|lock)\b.*\bcanal\b/i;
+const UNLOCK_RE = /\b(abre|desbloquea|unlock)\b.*\bcanal\b/i;
+const SLOW_RE = /\b(slowmode|modo\s*lento)\b[^\d]*(\d{1,4})?/i;
+const NICK_RE = /\b(ponle(?:\s+de)?\s+(?:apodo|nick|nombre)|cambia(?:le)?\s+(?:el\s+)?(?:apodo|nick|nombre)|renombra)\b/i;
 
+async function moderation(message, prompt) {
   const guild = message.guild;
   const { isStaff } = require('./tickets');
-  if (!isTrusted(guild, message.author.id) && !isStaff(message.member)) {
-    await message.reply(`Jaja ¿y tú quién eres para darme órdenes? 😭 Solo el staff me manda.`).catch(() => {});
-    return true;
-  }
-  if (target.id === message.client.user.id) {
-    await message.reply('¿Silenciarme a mí? Nel, yo soy el que silencia aquí 😎').catch(() => {});
-    return true;
-  }
-  if (target.id === CREATOR_ID || isTrusted(guild, target.id)) {
-    await message.reply(target.id === CREATOR_ID ? 'A mi papi lobo no lo toco ni de chiste 🐺' : 'Ese es staff, no lo puedo silenciar 🤝').catch(() => {});
+  const staff = isTrusted(guild, message.author.id) || isStaff(message.member);
+
+  const isUnmute = UNMUTE_RE.test(prompt);
+  const isMute = !isUnmute && MUTE_RE.test(prompt);
+  const isUnban = UNBAN_RE.test(prompt);
+  const isBan = !isUnban && BAN_RE.test(prompt);
+  const isKick = !isBan && !isUnban && KICK_RE.test(prompt);
+  const purge = prompt.match(PURGE_RE);
+  const isRoleAdd = ROLE_ADD_RE.test(prompt);
+  const isRoleDel = !isRoleAdd && ROLE_DEL_RE.test(prompt);
+  const isLock = LOCK_RE.test(prompt);
+  const isUnlock = UNLOCK_RE.test(prompt);
+  const slow = prompt.match(SLOW_RE);
+  const isNick = NICK_RE.test(prompt);
+
+  const anyAction = isMute || isUnmute || isBan || isUnban || isKick || purge || isRoleAdd || isRoleDel || isLock || isUnlock || (slow && /slow|lento/i.test(prompt)) || isNick;
+  if (!anyAction) return false;
+
+  if (!staff) {
+    await message.reply('Jaja ¿y tú quién eres para darme órdenes? 😭 Solo el staff me manda.').catch(() => {});
     return true;
   }
 
-  if (isMute) {
-    const ms = parseTime(prompt.replace(/<@!?\d+>/g, ''));
-    const ok = await target.timeout(ms, `AirProtect: ordenado por ${message.author.tag}`).then(() => true).catch(() => false);
-    await message
-      .reply(ok ? `Listo, ${target} calladito por **${fmtTime(ms)}** 🤐` : `No pude silenciar a ${target} 😓 (¿tiene un rol más alto que yo?)`)
-      .catch(() => {});
-    if (ok) log('warn', 'Silenciado por orden', `${message.author} mandó a silenciar a ${target} (\`${target.id}\`) por **${fmtTime(ms)}** usando !m.`);
-  } else {
-    const ok = await target.timeout(null, `AirProtect: ordenado por ${message.author.tag}`).then(() => true).catch(() => false);
-    await message.reply(ok ? `Ya puede hablar ${target}, pórtate bien eh 👀` : `No pude quitarle el silencio a ${target} 😓`).catch(() => {});
-    if (ok) log('ok', 'Silencio quitado por orden', `${message.author} le quitó el silencio a ${target} (\`${target.id}\`) usando !m.`);
+  const target = message.mentions.members.first();
+  const reply = (t) => message.reply(t).catch(() => {});
+  const protectedTarget = (t) => t && (t.id === message.client.user.id || t.id === CREATOR_ID || isTrusted(guild, t.id));
+  const needTarget = isMute || isUnmute || isBan || isKick || isRoleAdd || isRoleDel || isNick;
+  if (needTarget && !target) {
+    await reply('¿A quién? Menciónalo con @ 🤨');
+    return true;
+  }
+  if (needTarget && protectedTarget(target)) {
+    await reply(target.id === CREATOR_ID ? 'A mi papi lobo no lo toco ni de chiste 🐺' : target.id === message.client.user.id ? 'Nel, yo soy el que manda aquí 😎' : 'Ese es staff, no le hago nada 🤝');
+    return true;
+  }
+
+  try {
+    if (isMute) {
+      const ms = parseTime(prompt.replace(/<@!?\d+>/g, ''));
+      const ok = await target.timeout(ms, `Ordenado por ${message.author.tag}`).then(() => true).catch(() => false);
+      await reply(ok ? `Listo, ${target} calladito por **${fmtTime(ms)}** 🤐` : `No pude, ${target} tiene un rol más alto que yo 😓`);
+      if (ok) log('warn', 'Silenciado por orden', `${message.author} silenció a ${target} (\`${target.id}\`) por ${fmtTime(ms)} vía !m.`);
+    } else if (isUnmute) {
+      const ok = await target.timeout(null, `Ordenado por ${message.author.tag}`).then(() => true).catch(() => false);
+      await reply(ok ? `Ya puede hablar ${target}, pórtate bien 👀` : `No pude quitarle el silencio 😓`);
+      if (ok) log('ok', 'Silencio quitado', `${message.author} desilenció a ${target} vía !m.`);
+    } else if (isKick) {
+      const ok = await target.kick(`Ordenado por ${message.author.tag}`).then(() => true).catch(() => false);
+      await reply(ok ? `👢 ${target.user.tag} pa' fuera. Que no vuelva 😤` : `No pude patearlo, tiene rol más alto que yo 😓`);
+      if (ok) log('warn', 'Expulsado por orden', `${message.author} expulsó a ${target.user.tag} (\`${target.id}\`) vía !m.`);
+    } else if (isBan) {
+      const days = parseTime(prompt);
+      const ok = await guild.members.ban(target.id, { reason: `Ordenado por ${message.author.tag}`, deleteMessageSeconds: 3600 }).then(() => true).catch(() => false);
+      await reply(ok ? `🔨 ${target.user.tag} baneado. Bye 💀` : `No pude banearlo, tiene rol más alto que yo 😓`);
+      if (ok) log('danger', 'Baneado por orden', `${message.author} baneó a ${target.user.tag} (\`${target.id}\`) vía !m.`);
+    } else if (isUnban) {
+      const id = (prompt.match(/\b(\d{15,21})\b/) || [])[1];
+      if (!id) {
+        await reply('Dame el ID de la persona a desbanear 🤔');
+        return true;
+      }
+      const ok = await guild.bans.remove(id, `Ordenado por ${message.author.tag}`).then(() => true).catch(() => false);
+      await reply(ok ? `✅ Desbaneado \`${id}\`, que aproveche la segunda 👀` : `No pude, ¿seguro que estaba baneado? 🤨`);
+      if (ok) log('ok', 'Desbaneado por orden', `${message.author} desbaneó a \`${id}\` vía !m.`);
+    } else if (purge) {
+      const n = Math.min(Math.max(parseInt(purge[2], 10), 1), 100);
+      const del = await message.channel.bulkDelete(n + 1, true).then((c) => c.size - 1).catch(() => -1);
+      if (del < 0) await reply('No pude borrar (los mensajes de más de 14 días no se pueden) 😓');
+      else {
+        const m = await message.channel.send(`🧹 Borré **${del}** mensajes.`).catch(() => null);
+        setTimeout(() => m?.delete().catch(() => {}), 4000);
+        log('info', 'Purge por orden', `${message.author} borró ${del} mensajes en <#${message.channelId}> vía !m.`);
+      }
+    } else if (isRoleAdd || isRoleDel) {
+      const role = message.mentions.roles.first() || guild.roles.cache.find((r) => prompt.toLowerCase().includes(r.name.toLowerCase()) && r.name.length > 2 && r.id !== guild.id);
+      if (!role) {
+        await reply('¿Qué rol? Menciónalo o dime el nombre 🤔');
+        return true;
+      }
+      if (role.position >= guild.members.me.roles.highest.position) {
+        await reply(`El rol ${role} está más alto que yo, no lo puedo tocar 😓`);
+        return true;
+      }
+      const ok = await (isRoleAdd ? target.roles.add(role) : target.roles.remove(role)).then(() => true).catch(() => false);
+      await reply(ok ? (isRoleAdd ? `✅ Le puse ${role} a ${target} 😎` : `✅ Le quité ${role} a ${target}`) : 'No pude con ese rol 😓');
+      if (ok) log('info', 'Rol por orden', `${message.author} ${isRoleAdd ? 'dio' : 'quitó'} ${role.name} a ${target.user.tag} vía !m.`);
+    } else if (isLock || isUnlock) {
+      const ch = message.channel;
+      await ch.permissionOverwrites.edit(guild.id, { SendMessages: isLock ? false : null }, { reason: `Ordenado por ${message.author.tag}` });
+      await reply(isLock ? '🔒 Canal cerrado, nadie escribe' : '🔓 Canal abierto otra vez');
+      log(isLock ? 'warn' : 'ok', isLock ? 'Canal bloqueado' : 'Canal abierto', `${message.author} ${isLock ? 'cerró' : 'abrió'} <#${ch.id}> vía !m.`);
+    } else if (slow && /slow|lento/i.test(prompt)) {
+      const secs = Math.min(parseInt(slow[2] || '0', 10) || 0, 21600);
+      await message.channel.setRateLimitPerUser(secs, `Ordenado por ${message.author.tag}`);
+      await reply(secs ? `🐢 Modo lento: **${secs}s** entre mensajes` : '⚡ Quité el modo lento');
+    } else if (isNick) {
+      const nick = prompt.replace(/<@!?\d+>/g, '').replace(NICK_RE, '').replace(/\b(a|de|el|la)\b/gi, '').trim().slice(0, 32);
+      const ok = await target.setNickname(nick || null, `Ordenado por ${message.author.tag}`).then(() => true).catch(() => false);
+      await reply(ok ? (nick ? `✅ Ahora ${target} se llama **${nick}**` : `✅ Le quité el apodo a ${target}`) : 'No pude cambiarle el apodo (¿rol más alto?) 😓');
+    }
+  } catch (e) {
+    await reply(`Se me complicó eso 😓 (${e.message})`);
   }
   return true;
 }
