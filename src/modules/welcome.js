@@ -177,6 +177,31 @@ async function onJoin(member) {
   });
 }
 
+async function onLeave(member) {
+  if (member.guild.id !== cfg.guildId || member.user?.bot || !member.user) return;
+  const ch = await member.guild.channels.fetch(cfg.welcome.goodbyeChannelId).catch(() => null);
+  if (!ch?.isTextBased()) return;
+  const fake = {
+    user: member.user,
+    displayName: member.displayName || member.user.globalName || member.user.username,
+    displayAvatarURL: (o) => member.user.displayAvatarURL(o),
+    guild: member.guild,
+  };
+  const png = await renderCard(fake, {
+    badge: '💔 SE FUE',
+    subtitle: `Ahora somos ${member.guild.memberCount}`,
+    ring: ['#9aa0a6', '#4f545c'],
+    tint: ['rgba(30,30,40,0.45)', 'rgba(10,10,15,0.6)'],
+  });
+  const embed = new EmbedBuilder().setColor(0x4f545c).setImage('attachment://bye.png');
+  await ch.send({
+    content: `**${fake.displayName}** se fue de **${cfg.welcome.serverName}**... ojalá vuelva 🥀`,
+    embeds: [embed],
+    files: [new AttachmentBuilder(png, { name: 'bye.png' })],
+    allowedMentions: { parse: [] },
+  });
+}
+
 function init(client) {
   client.on(Events.GuildMemberAdd, (m) =>
     // pequeño retraso: si el anti-raid lo expulsa, no se da la bienvenida
@@ -185,6 +210,7 @@ function init(client) {
       onJoin(m).catch((e) => console.error('[welcome]', e));
     }, 2500)
   );
+  client.on(Events.GuildMemberRemove, (m) => onLeave(m).catch((e) => console.error('[goodbye]', e)));
 }
 
 module.exports = { init, renderCard };

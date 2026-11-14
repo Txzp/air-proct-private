@@ -6,6 +6,7 @@ const { log } = require('../logger');
 const antiraid = require('./antiraid');
 const warns = require('./warns');
 const mj = require('./mj');
+const logfiltro = require('./logfiltro');
 const giveaway = require('./giveaway');
 
 const defs = [
@@ -25,7 +26,7 @@ const defs = [
   new SlashCommandBuilder().setName('resetstrikes').setDescription('Reinicia las oportunidades de spam').addUserOption((o) => o.setName('usuario').setDescription('Usuario').setRequired(true)),
   new SlashCommandBuilder().setName('status').setDescription('Estado de AirProtect'),
 ].map((c) => c.setDefaultMemberPermissions(PermissionFlagsBits.Administrator).toJSON())
-  .concat(warns.defs, mj.defs, giveaway.defs); // /warn, /warns, /clearwarns: visibles para el staff (se valida por rol)
+  .concat(warns.defs, mj.defs, giveaway.defs, logfiltro.defs); // /warn, /warns, /clearwarns: visibles para el staff (se valida por rol)
 
 const LOCK_TYPES = [ChannelType.GuildText, ChannelType.GuildAnnouncement, ChannelType.GuildForum, ChannelType.GuildVoice];
 
@@ -75,6 +76,7 @@ async function onInteraction(i) {
 
   if (warns.names.includes(i.commandName)) return warns.handle(i);
   if (mj.names.includes(i.commandName)) return mj.handle(i);
+  if (logfiltro.names.includes(i.commandName)) return logfiltro.handle(i);
   if (giveaway.names.includes(i.commandName)) return giveaway.handle(i);
   if (!isTrusted(guild, i.user.id)) return reply('🛡️ Solo el dueño y la whitelist pueden usar AirProtect.');
 

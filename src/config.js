@@ -93,6 +93,7 @@ module.exports = {
 
   welcome: {
     channelId: process.env.WELCOME_CHANNEL_ID || '1566954709372239923',
+    goodbyeChannelId: process.env.GOODBYE_CHANNEL_ID || '1571027297283211324',
     serverName: process.env.WELCOME_SERVER_NAME || '0km',
     emojiName: process.env.WELCOME_EMOJI || 'hola',
   },

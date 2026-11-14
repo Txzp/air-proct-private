@@ -37,8 +37,14 @@ async function flush() {
   sending = false;
 }
 
+const SEP = '━━━━━━━━━━━━━━━━━━━━━';
 function send(embed, files) {
   embed.setTimestamp();
+  // Separador visual al final de cada log + marca de AirProtect
+  const d = embed.data.description;
+  if (d && !d.includes('━')) embed.setDescription(`${d}\n${SEP}`);
+  if (!embed.data.footer) embed.setFooter({ text: 'AirProtect • Logs' });
+  else if (!embed.data.footer.text.includes('AirProtect')) embed.setFooter({ text: `${embed.data.footer.text} • AirProtect` });
   queue.push({ embed, files });
   flush();
 }
