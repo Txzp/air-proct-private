@@ -62,6 +62,11 @@ function markDirty() {
   dirty = true;
 }
 
+function set(key, value) {
+  data[key] = value;
+  dirty = true;
+}
+
 async function save() {
   if (!dirty || !guildRef) return;
   if (loadFailed) return console.error('[db] No se guarda: los datos no se pudieron cargar al arrancar');
@@ -92,4 +97,4 @@ function start(intervalMs = 2 * 60_000) {
   setInterval(() => save(), intervalMs).unref();
 }
 
-module.exports = { load, get, markDirty, save, start, NAME };
+module.exports = { load, get, set, markDirty, save, start, NAME };

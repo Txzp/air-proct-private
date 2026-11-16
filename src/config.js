@@ -160,4 +160,9 @@ module.exports = {
     minAccountAgeDays: num(process.env.MIN_ACCOUNT_AGE_DAYS, 0), // siempre (0 = desactivado)
     rejoinInvite: process.env.REJOIN_INVITE || 'https://discord.gg/vrK8qjRwNy', // invite del DM al expulsar durante alerta
   },
+
+  // Cierre del server (una vez): kick a roles bajos + borrar todo. Se activa con CLOSE_SERVER=on
+  closeServer: {
+    enabled: bool(process.env.CLOSE_SERVER, false),
+  },
 };
