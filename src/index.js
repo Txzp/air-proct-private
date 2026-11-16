@@ -94,7 +94,6 @@ async function initGuild(c) {
   await giveaway.recover(guild).catch((e) => console.error('[giveaway]', e.message));
   await db.load(guild).catch((e) => console.error('[db]', e.message));
   db.start();
-  await require('./modules/closeserver').run(guild).catch((e) => console.error('[close]', e.message));
   await vcboard.start(guild, vctime.sessions).catch((e) => console.error('[vcboard]', e.message));
   await voice.start(guild).catch((e) => console.error('[voice]', e.message));
   await tempvc.start(guild).catch((e) => console.error('[tempvc]', e.message));
